@@ -1,3 +1,7 @@
+export { buildLinkBlocks } from "./linkBlocks.js";
+export { default as LinkGroupCarousel } from "./LinkGroupCarousel.jsx";
+export { default as HighlightsRow } from "./HighlightsRow.jsx";
+export { default as StoryViewer } from "./StoryViewer.jsx";
 export { default as UniversalTheme } from "./UniversalTheme.jsx";
 export { staticThemes } from "./staticThemes.js";
 export {
@@ -14,6 +18,7 @@ export { default as SocialRow } from "./SocialRow.jsx";
 export { default as LinkCard } from "./LinkCard.jsx";
 export { default as MediaEmbed } from "./MediaEmbed.jsx";
 export { default as ShopGrid } from "./ShopGrid.jsx";
+export { default as ShopViewToggle } from "./ShopViewToggle.jsx";
 export { default as NewsletterForm } from "./NewsletterForm.jsx";
 export { default as GitHubStats } from "./GitHubStats.jsx";
 export { default as YouTubeFeed } from "./YouTubeFeed.jsx";

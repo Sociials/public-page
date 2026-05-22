@@ -46,7 +46,7 @@ export default function ProfileScrollContainer({
       )}
 
       <div
-        className="absolute inset-0 z-10 overflow-y-auto [&::-webkit-scrollbar]:hidden flex flex-col"
+        className="absolute inset-0 z-10 flex min-w-0 flex-col overflow-y-auto overflow-x-hidden [&::-webkit-scrollbar]:hidden"
         onScroll={(e) => {
           const scrolled = e.target.scrollTop > 25;
           setIsScrolled((prev) => (prev === scrolled ? prev : scrolled));

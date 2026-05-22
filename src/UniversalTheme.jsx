@@ -8,8 +8,6 @@ import {
   FaHeart,
   FaMugHot,
   FaPatreon,
-  FaTimes,
-  FaExternalLinkAlt,
 } from "react-icons/fa";
 
 import { resolveCustomFontStack, resolveStaticFontStack } from "./fonts.js";
@@ -21,6 +19,7 @@ import LinkCard from "./LinkCard.jsx";
 import LinkGroupCarousel from "./LinkGroupCarousel.jsx";
 import MediaEmbed from "./MediaEmbed.jsx";
 import ShopGrid from "./ShopGrid.jsx";
+import ShopViewToggle from "./ShopViewToggle.jsx";
 import InstagramFeed from "./InstagramFeed.jsx";
 import YouTubeFeed from "./YouTubeFeed.jsx";
 import NewsletterForm from "./NewsletterForm.jsx";
@@ -30,6 +29,8 @@ import PageBlogView from "./PageBlogView.jsx";
 import PageGalleryView from "./PageGalleryView.jsx";
 import PageSiteNav from "./PageSiteNav.jsx";
 import ShareIcon from "./ShareIcon.jsx";
+import HighlightsRow from "./HighlightsRow.jsx";
+import StoryViewer from "./StoryViewer.jsx";
 
 /**
  * Public bio page shell. Wire app-specific behavior via props.
@@ -125,30 +126,10 @@ const UniversalTheme = ({
         ? { background: "rgba(0,0,0,0.18)" }
         : { background: "rgba(0,0,0,0.06)" };
 
-  const scrollRef = useRef(null);
-  const handleWheelScroll = (e) => {
-    const container = scrollRef.current;
-    if (!container) return;
-
-    // If user is scrolling horizontally (e.g. trackpad), let native behavior happen
-    if (Math.abs(e.deltaX) > Math.abs(e.deltaY)) {
-      return;
-    }
-
-    // Determine if we can scroll horizontally in the target direction
-    const isScrollingRight = e.deltaY > 0;
-    const isScrollingLeft = e.deltaY < 0;
-
-    // Check boundaries to allow vertical page scroll when at edges
-    const atLeftEdge = container.scrollLeft <= 0;
-    const atRightEdge = container.scrollLeft + container.clientWidth >= container.scrollWidth - 1;
-
-    if (isScrollingLeft && atLeftEdge) return; // Allow page scroll up
-    if (isScrollingRight && atRightEdge) return; // Allow page scroll down
-
-    e.preventDefault();
-    container.scrollLeft += e.deltaY;
-  };
+  const highlightAccent = isCustom
+    ? customButton.backgroundColor || "#15F5BA"
+    : "#15F5BA";
+  const highlightCtaText = isCustom ? customButton.textColor || "#000000" : "#000000";
 
   const onTrackViewRef = useRef(onTrackView);
   onTrackViewRef.current = onTrackView;
@@ -421,7 +402,7 @@ const UniversalTheme = ({
 
         {/* --- PROFILE SECTION (overlaps banner for centered/discord) --- */}
         <article 
-          className={`flex flex-col relative z-10 w-full px-4
+          className={`flex flex-col relative z-10 w-full min-w-0 px-4
             ${
               user?.banner?.enabled && user?.banner?.image
                 ? user.banner.style === "discord"
@@ -534,62 +515,15 @@ const UniversalTheme = ({
 
         {showLinksContent && (
           <>
-        {/* --- D. HIGHLIGHTS SECTION --- */}
         {user?.highlights?.items?.length > 0 && (
-          <div className="w-full mt-4 mb-1 md:mt-6 md:mb-2">
-
-            {user.highlights.title && (
-              <h3
-                className={`text-center font-bold mb-3 uppercase tracking-widest opacity-80 text-[0.65rem] ${textClass}`}
-              >
-                {user.highlights.title}
-              </h3>
-            )}
-
-            <div
-              ref={scrollRef}
-              onWheel={handleWheelScroll}
-              className={`flex gap-6 overflow-x-auto pb-4 px-4 snap-x snap-mandatory scroll-smooth scrollbar-hide`}
-              style={{
-                scrollbarWidth: 'none', /* Firefox */
-                msOverflowStyle: 'none', /* IE/Edge */
-              }}
-            >
-              {user.highlights.items.map((item, index) => (
-                <div
-                  key={index}
-                  onClick={() => setActiveStoryIndex(index)}
-                  className={`snap-center shrink-0 flex flex-col items-center gap-2 group cursor-pointer w-[64px]`}
-                >
-                  {/* Instagram-style Green Ring Container */}
-                  <div className={`w-[60px] h-[60px] rounded-full p-[2px] bg-[#15F5BA]`}>
-                    {/* The 'Gap' is created by this white border/background wrapper */}
-                    <div className="w-full h-full rounded-full border-[3px] border-white bg-white overflow-hidden relative">
-                      {item.image ? (
-                        <img
-                          src={item.image}
-                          alt={item.title}
-                          className="w-full h-full object-cover"
-                        />
-                      ) : (
-                        <div className="w-full h-full bg-gray-200 animate-pulse" />
-                      )}
-                    </div>
-                  </div>
-
-
-                  {/* Title Label - Clean & Minimal */}
-                  <span
-                    style={themeFontFamily}
-                    className={`text-[10px] font-medium tracking-wide text-center truncate w-20 leading-tight opacity-90 ${textClass}`}
-                  >
-                    {item.title}
-                  </span>
-                </div>
-              ))}
-            </div>
-
-          </div>
+          <HighlightsRow
+            items={user.highlights.items}
+            title={user.highlights.title}
+            textClass={textClass}
+            themeFontFamily={themeFontFamily}
+            accentColor={highlightAccent}
+            onItemClick={setActiveStoryIndex}
+          />
         )}
 
         {/* --- YOUTUBE FEED (TOP POSITION) --- */}
@@ -602,45 +536,21 @@ const UniversalTheme = ({
           <GitHubStats githubData={user.integrations.github} theme={effectiveTheme} />
         )}
 
-        {/* --- TOGGLE: LINKS / SHOP (SEGMENTED CONTROL - FIXED B&W THEME) --- */}
         {user?.shop?.filter(s => s.isActive !== false)?.length > 0 && (
-          <div className="flex justify-center w-full mt-3 mb-4 md:mt-6 md:mb-8 px-6 md:px-8">
-            <div className="flex p-1 bg-white border border-gray-200 rounded-full shadow-sm">
-              <button
-                onClick={() => setViewMode("links")}
-                className={`
-                  relative px-6 py-2 text-sm font-bold rounded-full transition-all duration-200
-                  ${viewMode === "links"
-                    ? "bg-black text-white shadow-md"
-                    : "text-gray-500 hover:text-black hover:bg-gray-50"
-                  }
-                `}
-              >
-                Links
-              </button>
-              <button
-                onClick={() => setViewMode("shop")}
-                className={`
-                  relative px-6 py-2 text-sm font-bold rounded-full transition-all duration-200
-                  ${viewMode === "shop"
-                    ? "bg-black text-white shadow-md"
-                    : "text-gray-500 hover:text-black hover:bg-gray-50"
-                  }
-                `}
-              >
-                Shop
-              </button>
-            </div>
-          </div>
+          <ShopViewToggle
+            viewMode={viewMode}
+            onChange={setViewMode}
+            className="mt-3 mb-4 md:mt-6 md:mb-6 px-4"
+          />
         )}
 
         {/* --- E. MAIN CONTENT (LINKS OR SHOP) --- */}
         {viewMode === 'shop' ? (
           <div className="w-full mt-2 mb-8">
-            <ShopGrid items={user.shop} theme={effectiveTheme} />
+            <ShopGrid items={user.shop} />
           </div>
         ) : (
-          <div className="w-full flex flex-col gap-3 md:gap-4 mt-1 md:mt-2 mb-6 md:mb-8">
+          <div className="w-full min-w-0 flex flex-col gap-3 md:gap-4 mt-1 md:mt-2 mb-6 md:mb-8">
             {linkBlocks.map((block) => {
               if (block.kind === "featured") {
                 return (
@@ -675,7 +585,7 @@ const UniversalTheme = ({
 
               if (block.kind === "group") {
                 return (
-                  <div key={block.group._id} className="w-full mb-2">
+                  <div key={block.group._id} className="w-full min-w-0 mb-2">
                     {renderGroupTitle(block.group)}
                     {block.layout === "carousel" ? (
                       <LinkGroupCarousel
@@ -780,99 +690,10 @@ const UniversalTheme = ({
           stories={user.highlights.items}
           startIndex={activeStoryIndex}
           onClose={() => setActiveStoryIndex(null)}
+          accentColor={highlightAccent}
+          ctaTextColor={highlightCtaText}
         />
       )}
-      </div>
-    </div>
-  );
-};
-
-// --- SUB-COMPONENT: Story Viewer ---
-const StoryViewer = ({ stories, startIndex, onClose }) => {
-  const [currentIndex, setCurrentIndex] = useState(startIndex);
-  const story = stories[currentIndex];
-
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      handleNext();
-    }, 5000); // 5 seconds per story
-
-    return () => clearTimeout(timer);
-  }, [currentIndex]);
-
-  const handleNext = () => {
-    if (currentIndex < stories.length - 1) {
-      setCurrentIndex(prev => prev + 1);
-    } else {
-      onClose();
-    }
-  };
-
-  const handlePrev = () => {
-    if (currentIndex > 0) {
-      setCurrentIndex(prev => prev - 1);
-    }
-  };
-
-  if (!story) return null;
-
-  return (
-    <div className="fixed inset-0 z-[100] bg-black md:bg-black/90 md:backdrop-blur-md flex items-center justify-center md:p-4 animate-in fade-in duration-200">
-
-      {/* Navigation Tap Areas */}
-      <div className="absolute inset-y-0 left-0 w-1/3 z-40" onClick={handlePrev} />
-      <div className="absolute inset-y-0 right-0 w-1/3 z-40" onClick={handleNext} />
-
-      <div className="relative w-full h-[100dvh] md:h-auto md:max-w-md md:aspect-[9/16] md:max-h-[90vh] bg-black md:rounded-2xl overflow-hidden md:shadow-2xl flex flex-col pointer-events-none">
-
-        {/* Top Bar (Progress) */}
-        <div className="absolute top-0 left-0 right-0 px-2 pt-3 md:pt-4 flex gap-1 z-50">
-          {stories.map((_, idx) => (
-            <div key={idx} className="h-[2px] md:h-1 flex-1 bg-white/30 rounded-full overflow-hidden">
-              <div
-                className={`h-full bg-white w-full origin-left ${idx === currentIndex ? 'animate-[progress_5s_linear]' : idx < currentIndex ? 'scale-x-100' : 'scale-x-0'}`}
-              />
-            </div>
-          ))}
-        </div>
-
-        {/* Close Button & Header Info */}
-        <div className="absolute top-6 md:top-8 left-0 right-0 px-4 flex justify-end z-[60] pointer-events-auto">
-          <button
-            onClick={onClose}
-            className="text-white/70 hover:text-white transition-colors p-2 -mr-2"
-          >
-            <FaTimes className="w-6 h-6 drop-shadow-md" />
-          </button>
-        </div>
-
-        {/* Image */}
-        <img
-          key={story.image} // Re-renders image on change
-          src={story.image}
-          alt={story.title}
-          className="w-full h-full object-cover animate-in fade-in duration-300 pointer-events-auto"
-        />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-transparent to-black/50 pointer-events-none" />
-
-        {/* Content */}
-        <div className="absolute bottom-0 left-0 right-0 p-6 pb-10 md:pb-6 flex flex-col items-center text-center z-50 pointer-events-auto">
-          {story.title && (
-            <h2 className="text-white font-bold text-xl md:text-2xl mb-4 drop-shadow-md">{story.title}</h2>
-          )}
-
-          {story.link && (
-            <a
-              href={story.link}
-              target="_blank"
-              rel="noreferrer"
-              className="w-full bg-[#15F5BA] hover:bg-white text-black font-black uppercase tracking-widest py-3 md:py-4 rounded-full flex items-center justify-center gap-2 transition-all hover:scale-105 active:scale-95 shadow-lg text-sm md:text-base"
-              onClick={(e) => e.stopPropagation()}
-            >
-              Visit Link <FaExternalLinkAlt size={12} />
-            </a>
-          )}
-        </div>
       </div>
     </div>
   );
