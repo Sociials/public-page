@@ -7,5 +7,5 @@ node scripts/bump-and-tag.mjs || exit 1
 branch="$(git branch --show-current)"
 git push "$remote" "$branch" --follow-tags --no-verify
 
-# Cancel the original push (already done above) so we don't push twice.
+# Cancel the original push (already done above) so we don't push twice.sd
 exit 1
