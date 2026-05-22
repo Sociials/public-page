@@ -26,23 +26,29 @@ import { UniversalTheme } from "@sociials/public-page";
 
 No separate deployment — bundled by Vite/Next at app build time.
 
-## Release (separate repo)
+## Release (this repo)
 
-On each `git push`, the pre-push hook (installed via `npm install` → `prepare`):
+1. Bump `"version"` in `package.json` (e.g. `0.1.6` → `0.1.7`).
+2. Commit, push, and tag:
 
-1. Bumps patch in `package.json` (e.g. `0.1.1` → `0.1.2`)
-2. Commits `chore(release): v0.1.2`
-3. Tags `v0.1.2`
-4. Pushes branch + tags
-
-Skip once: `SKIP_RELEASE=1 git push`
-
-Manual release: `npm run release` then `git push --follow-tags`
-
-In **client** / **frontend** prod `package.json`, pin the new tag:
-
-```json
-"@sociials/public-page": "github:Sociials/public-page#v0.1.2"
+```bash
+git add package.json
+git commit -m "chore(release): v0.1.7"
+git push origin main
+git tag v0.1.7
+git push origin v0.1.7
 ```
 
-Monorepo local dev uses `file:../packages/public-page` — change to the GitHub spec only in deploy repos.
+3. In **client** / **frontend** deploy repos, pin the tag and refresh the lock file:
+
+```json
+"@sociials/public-page": "github:Sociials/public-page#v0.1.7"
+```
+
+```bash
+npm install
+```
+
+Commit `package.json` and `package-lock.json`, then redeploy.
+
+Monorepo local dev uses `file:../packages/public-page` — use the GitHub spec only in deploy repos.
