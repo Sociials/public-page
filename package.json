@@ -4,6 +4,10 @@
   "private": true,
   "type": "module",
   "main": "./src/index.js",
+  "scripts": {
+    "prepare": "node scripts/install-git-hooks.mjs",
+    "release": "node scripts/bump-and-tag.mjs"
+  },
   "exports": {
     ".": "./src/index.js",
     "./staticThemes": "./src/staticThemes.js"

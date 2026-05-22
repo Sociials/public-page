@@ -1,0 +1,11 @@
+#!/bin/sh
+# Bump patch version, tag, then push branch + tags (single `git push` from your side).
+remote="$1"
+
+node scripts/bump-and-tag.mjs || exit 1
+
+branch="$(git branch --show-current)"
+git push "$remote" "$branch" --follow-tags --no-verify
+
+# Cancel the original push (already done above) so we don't push twice.
+exit 1
