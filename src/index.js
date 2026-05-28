@@ -1,4 +1,12 @@
 export { buildLinkBlocks } from "./linkBlocks.js";
+export {
+  BANNER_FULL_BLEED_CLASS,
+  BANNER_FLOATING_CLASS,
+  BANNER_FULL_BLEED_PREVIEW_CLASS,
+  BANNER_FLOATING_PREVIEW_CLASS,
+  BANNER_PROFILE_OVERLAP_CLASS,
+  BANNER_PROFILE_OVERLAP_PREVIEW_CLASS,
+} from "./bannerLayout.js";
 export { default as LinkGroupCarousel } from "./LinkGroupCarousel.jsx";
 export { default as HighlightsRow } from "./HighlightsRow.jsx";
 export { default as StoryViewer } from "./StoryViewer.jsx";

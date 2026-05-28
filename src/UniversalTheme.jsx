@@ -28,6 +28,11 @@ import { buildLinkBlocks } from "./linkBlocks.js";
 import PageBlogView from "./PageBlogView.jsx";
 import PageGalleryView from "./PageGalleryView.jsx";
 import PageSiteNav from "./PageSiteNav.jsx";
+import {
+  BANNER_FLOATING_CLASS,
+  BANNER_FULL_BLEED_CLASS,
+  BANNER_PROFILE_OVERLAP_CLASS,
+} from "./bannerLayout.js";
 import ShareIcon from "./ShareIcon.jsx";
 import HighlightsRow from "./HighlightsRow.jsx";
 import StoryViewer from "./StoryViewer.jsx";
@@ -371,7 +376,7 @@ const UniversalTheme = ({
           <div className="w-full shrink-0 relative z-0">
             <div className="relative">
               <div
-                className="w-full h-28 md:h-52 bg-cover bg-center"
+                className={BANNER_FULL_BLEED_CLASS}
                 style={{ backgroundImage: `url(${user.banner.image})` }}
               />
               <div className="absolute bottom-0 left-0 right-0 h-[3px] bg-black/15 shadow-[0_1px_3px_rgba(0,0,0,0.15)]" />
@@ -387,7 +392,7 @@ const UniversalTheme = ({
           <div className="w-full shrink-0 relative z-0 px-4 pt-2 md:pt-3">
             <div className="relative w-full">
               <div
-                className="w-full h-28 md:h-44 rounded-[20px] bg-cover bg-center border-2 border-black shadow-[4px_4px_0px_rgba(0,0,0,1)]"
+                className={BANNER_FLOATING_CLASS}
                 style={{ backgroundImage: `url(${user.banner.image})` }}
               />
               {renderTopChrome("absolute top-0 left-0 right-0 z-20 pt-2.5 px-1 md:pt-3", {
@@ -406,22 +411,22 @@ const UniversalTheme = ({
             ${
               user?.banner?.enabled && user?.banner?.image
                 ? user.banner.style === "discord"
-                  ? "-mt-10 md:-mt-[62px] px-5 md:px-6 items-start text-left"
+                  ? `${BANNER_PROFILE_OVERLAP_CLASS} px-5 md:px-6 items-start text-left`
                   : user.banner.style === "centered"
-                    ? "-mt-10 md:-mt-[62px] items-center text-center"
-                    : "mt-2 md:mt-4 items-center text-center"
+                    ? `${BANNER_PROFILE_OVERLAP_CLASS} items-center text-center`
+                    : `${BANNER_PROFILE_OVERLAP_CLASS} items-center text-center`
                 : "items-center text-center pt-1 md:pt-0"
             }
             ${textClass}
           `}
         >
-          <div className="shrink-0">
+          <div className="shrink-0 relative z-10">
             {currentProfilePic ? (
               <img
                 src={currentProfilePic}
                 alt={`${user?.username || "User"}'s profile picture on Sociials`}
                 className={`w-20 h-20 md:w-[125px] md:h-[125px] rounded-full object-cover shadow-lg md:shadow-xl ${
-                  user?.banner?.enabled && user?.banner?.image && user.banner.style !== "floating"
+                  user?.banner?.enabled && user?.banner?.image
                     ? "border-[3px] md:border-[5px] border-white ring-1 ring-black/10"
                     : "border-[3px] md:border-4 border-white/80"
                 }`}
