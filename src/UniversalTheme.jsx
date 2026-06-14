@@ -3,11 +3,6 @@ import {
   FaCheck,
   FaUserCircle,
   FaChevronDown,
-  FaCoffee,
-  FaPaypal,
-  FaHeart,
-  FaMugHot,
-  FaPatreon,
 } from "react-icons/fa";
 
 import { resolveCustomFontStack, resolveStaticFontStack } from "./fonts.js";
@@ -17,6 +12,8 @@ import { staticThemes } from "./staticThemes.js";
 import SocialRow from "./SocialRow.jsx";
 import LinkCard from "./LinkCard.jsx";
 import LinkGroupCarousel from "./LinkGroupCarousel.jsx";
+import LinkGroupProjects from "./LinkGroupProjects.jsx";
+import SupportButton from "./SupportButton.jsx";
 import MediaEmbed from "./MediaEmbed.jsx";
 import ShopGrid from "./ShopGrid.jsx";
 import ShopViewToggle from "./ShopViewToggle.jsx";
@@ -36,6 +33,7 @@ import {
 import ShareIcon from "./ShareIcon.jsx";
 import HighlightsRow from "./HighlightsRow.jsx";
 import StoryViewer from "./StoryViewer.jsx";
+import LockedPageView from "./LockedPageView.jsx";
 
 /**
  * Public bio page shell. Wire app-specific behavior via props.
@@ -67,6 +65,16 @@ const UniversalTheme = ({
       <div className="min-h-screen w-full flex items-center justify-center p-8 text-center text-gray-600">
         Profile could not be loaded.
       </div>
+    );
+  }
+
+  if (user?.locked) {
+    return (
+      <LockedPageView
+        user={user}
+        onGoHome={onGoHome}
+        homeLogoSrc={homeLogoSrc}
+      />
     );
   }
 
@@ -228,59 +236,6 @@ const UniversalTheme = ({
 
   const currentProfilePic = user?.profilePicture;
 
-  const getPaymentUrl = (platform, username) => {
-    if (!username) return "#";
-    switch (platform) {
-      case "buymeacoffee":
-        return `https://www.buymeacoffee.com/${username}`;
-      case "ko-fi":
-        return `https://ko-fi.com/${username}`;
-      case "paypal":
-        return `https://paypal.me/${username}`;
-      case "patreon":
-        return `https://patreon.com/${username}`;
-      default:
-        return username.startsWith("http")
-          ? username
-          : `https://${username}`;
-    }
-  };
-
-  const getPlatformConfig = (platform) => {
-    switch (platform) {
-      case "buymeacoffee":
-        return {
-          icon: <FaCoffee size={16} />,
-          label: "Buy me a coffee",
-          style: "bg-[#FFDD00] text-black border-black",
-        };
-      case "ko-fi":
-        return {
-          icon: <FaMugHot size={16} />,
-          label: "Ko-fi",
-          style: "bg-[#13C3FF] text-black border-black",
-        };
-      case "paypal":
-        return {
-          icon: <FaPaypal size={16} />,
-          label: "PayPal",
-          style: "bg-[#0070BA] text-white border-black",
-        };
-      case "patreon":
-        return {
-          icon: <FaPatreon size={16} />,
-          label: "Patreon",
-          style: "bg-[#FF424D] text-white border-black",
-        };
-      default:
-        return {
-          icon: <FaHeart size={16} />,
-          label: "Support",
-          style: "bg-[#FF90E8] text-black border-black",
-        };
-    }
-  };
-
   const hasBanner = user?.banner?.enabled && user?.banner?.image;
   const isFloatingBanner = hasBanner && user.banner.style === "floating";
   const isFullBleedBanner = hasBanner && !isFloatingBanner;
@@ -301,33 +256,19 @@ const UniversalTheme = ({
         <div />
       )}
 
-      <div className="flex items-center gap-3">
-        {user?.monetization?.enabled &&
-          user.monetization.username &&
-          (() => {
-            const config = getPlatformConfig(user.monetization.platform);
-            return (
-              <a
-                href={getPaymentUrl(
-                  user.monetization.platform,
-                  user.monetization.username,
-                )}
-                target="_blank"
-                rel="noopener noreferrer"
-                className={`flex items-center justify-center w-10 h-10 rounded-full border-2 shadow-[3px_3px_0px_rgba(0,0,0,1)] hover:-translate-y-0.5 hover:shadow-[5px_5px_0px_rgba(0,0,0,1)] active:translate-y-0 active:shadow-[1px_1px_0px_rgba(0,0,0,1)] transition-all duration-200 ${config.style}`}
-                title={config.label}
-              >
-                {React.cloneElement(config.icon, { size: 18 })}
-              </a>
-            );
-          })()}
+      <div className="flex items-center gap-2">
+        <SupportButton
+          monetization={user?.monetization}
+          overlay={overlay}
+          iconHoverClass={iconHoverClass}
+        />
 
         <button
           onClick={handleShare}
           className={
             overlay
-              ? "p-2 rounded-full bg-black/30 backdrop-blur-md border border-white/15 hover:bg-black/50 transition flex items-center gap-2 text-white"
-              : `p-2 rounded-full transition flex items-center gap-2 ${iconHoverClass}`
+              ? "inline-flex h-9 w-9 items-center justify-center rounded-full bg-black/30 backdrop-blur-md border border-white/15 text-white hover:bg-black/50 hover:scale-105 active:scale-95 transition-all duration-200"
+              : `inline-flex h-9 w-9 items-center justify-center rounded-full transition-all duration-200 hover:bg-black/5 active:scale-95 ${iconHoverClass}`
           }
           aria-label="Share profile"
         >
@@ -594,6 +535,12 @@ const UniversalTheme = ({
                     {renderGroupTitle(block.group)}
                     {block.layout === "carousel" ? (
                       <LinkGroupCarousel
+                        links={block.children}
+                        theme={effectiveTheme}
+                        onLinkClick={handleLinkClick}
+                      />
+                    ) : block.layout === "projects" ? (
+                      <LinkGroupProjects
                         links={block.children}
                         theme={effectiveTheme}
                         onLinkClick={handleLinkClick}

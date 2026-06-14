@@ -48,7 +48,12 @@ export const buildLinkBlocks = (links = []) => {
       blocks.push({
         kind: "group",
         group: link,
-        layout: link.groupLayout === "carousel" ? "carousel" : "stack",
+        layout:
+          link.groupLayout === "carousel"
+            ? "carousel"
+            : link.groupLayout === "projects"
+              ? "projects"
+              : "stack",
         children,
       });
       continue;

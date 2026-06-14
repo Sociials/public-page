@@ -8,6 +8,8 @@ export {
   BANNER_PROFILE_OVERLAP_PREVIEW_CLASS,
 } from "./bannerLayout.js";
 export { default as LinkGroupCarousel } from "./LinkGroupCarousel.jsx";
+export { default as LinkGroupProjects } from "./LinkGroupProjects.jsx";
+export { default as SupportButton } from "./SupportButton.jsx";
 export { default as HighlightsRow } from "./HighlightsRow.jsx";
 export { default as StoryViewer } from "./StoryViewer.jsx";
 export { default as UniversalTheme } from "./UniversalTheme.jsx";
