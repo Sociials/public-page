@@ -1,103 +1,154 @@
 import React from "react";
 import { FaGithub, FaStar, FaCodeBranch, FaUsers, FaChartLine } from "react-icons/fa6";
 
-const GitHubStats = ({ githubData, theme }) => {
+const C = {
+  bg: "#0D1117",
+  surface: "#161B22",
+  border: "#30363D",
+  text: "#E6EDF3",
+  muted: "#8B949E",
+};
+
+const fmt = (n) => {
+  if (!n) return "0";
+  if (n >= 1000) return `${(n / 1000).toFixed(1)}k`;
+  return String(n);
+};
+
+const GitHubStats = ({ githubData }) => {
   if (!githubData || !githubData.connected || !githubData.settings?.enabled) {
     return null;
   }
 
   const { stats, username } = githubData;
   const settings = githubData.settings || {};
+  const chartUrl = `https://ghchart.rshah.org/3FB950/${username}`;
 
-  const getBrightness = (hex) => {
-    if (!hex) return 200;
-    hex = hex.replace('#', '');
-    if (hex.length === 3) hex = hex.split('').map(c => c + c).join('');
-    const r = parseInt(hex.substring(0, 2), 16);
-    const g = parseInt(hex.substring(2, 4), 16);
-    const b = parseInt(hex.substring(4, 6), 16);
-    return (r * 299 + g * 587 + b * 114) / 1000;
-  };
-
-  const pageBg = theme?.isCustom
-    ? theme?.background?.color
-    : theme?.customTheme?.background?.color;
-  const isDark = pageBg ? getBrightness(pageBg) < 128 : false;
-
-  const chartUrl = `https://ghchart.rshah.org/${isDark ? "4ADE80" : "219138"}/${username}`;
-
-  const fmt = (n) => {
-    if (!n) return "0";
-    if (n >= 1000) return `${(n / 1000).toFixed(1)}k`;
-    return String(n);
-  };
+  const statItems = [
+    { label: "Repos", value: stats.repos, icon: FaCodeBranch },
+    { label: "Followers", value: stats.followers, icon: FaUsers },
+    { label: "Activity", value: stats.contributions || 0, icon: FaChartLine },
+  ];
 
   return (
-    <a
-      href={`https://github.com/${username}`}
-      target="_blank"
-      rel="noopener noreferrer"
-      className="block w-full mt-4 px-2 md:px-0 group"
-      style={{ textDecoration: "none", color: "inherit" }}
-    >
-      <div
-        className={`overflow-hidden rounded-2xl p-4 transition-all duration-300 group-hover:scale-[0.99] group-active:scale-[0.97] ${
-          isDark
-            ? "bg-[#0d1117] border border-[#30363d] text-[#e6edf3]"
-            : "bg-white/60 backdrop-blur-xl border border-black/6 text-[#1f2328] shadow-[0_1px_2px_rgba(0,0,0,0.04)]"
-        }`}
+    <div className="w-full mt-5 mb-1">
+      <div className="flex items-center gap-1.5 mb-2">
+        <FaGithub size={11} style={{ color: C.muted }} />
+        <span
+          className="text-[10px] font-bold tracking-widest uppercase"
+          style={{ color: C.muted }}
+        >
+          GitHub
+        </span>
+      </div>
+
+      <a
+        href={`https://github.com/${username}`}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="group block w-full overflow-hidden rounded-xl border transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_8px_24px_rgba(0,0,0,0.35)]"
+        style={{
+          textDecoration: "none",
+          backgroundColor: C.bg,
+          borderColor: C.border,
+          color: C.text,
+        }}
       >
-        {/* Header */}
-        <div className="flex items-center gap-2.5 mb-3">
-          <FaGithub size={18} className={isDark ? "text-white" : "text-[#1f2328]"} />
-          <span className="font-semibold text-sm tracking-tight">{username}</span>
-        </div>
+        <div className="px-3.5 py-3.5 sm:px-4">
+          {/* Header */}
+          <div className="flex items-center justify-between gap-3 mb-3">
+            <div className="min-w-0">
+              <p
+                className="text-sm font-bold tracking-tight truncate"
+                style={{ color: C.text }}
+              >
+                @{username}
+              </p>
+              {stats.topLanguages?.length > 0 && settings.showLanguages && (
+                <p
+                  className="text-[10px] font-medium truncate mt-0.5"
+                  style={{ color: C.muted }}
+                >
+                  {stats.topLanguages.slice(0, 3).join(" · ")}
+                </p>
+              )}
+            </div>
 
-        {/* Stats row — icon + number */}
-        {settings.showStats && (
-          <div className="flex items-center gap-4 mb-3">
-            {[
-              { icon: <FaStar size={12} />, value: stats.stars },
-              { icon: <FaCodeBranch size={12} />, value: stats.repos },
-              { icon: <FaUsers size={12} />, value: stats.followers },
-              { icon: <FaChartLine size={12} />, value: stats.contributions || 0 },
-            ].map((item, idx) => (
-              <div key={idx} className="flex items-center gap-1.5">
-                <span className={isDark ? "text-[#7d8590]" : "text-[#656d76]"}>{item.icon}</span>
-                <span className="text-sm font-bold tabular-nums">{fmt(item.value)}</span>
+            {settings.showStats && (
+              <div
+                className="flex shrink-0 items-center gap-1 rounded-md border px-2 py-1"
+                style={{ backgroundColor: C.surface, borderColor: C.border }}
+              >
+                <FaStar size={9} className="text-amber-400" />
+                <span
+                  className="text-[11px] font-bold tabular-nums"
+                  style={{ color: C.text }}
+                >
+                  {fmt(stats.stars)}
+                </span>
               </div>
-            ))}
+            )}
           </div>
-        )}
 
-        {/* Languages */}
-        {stats.topLanguages?.length > 0 && settings.showLanguages && (
-          <div className={`text-[11px] font-medium mb-3 truncate ${isDark ? "text-[#7d8590]" : "text-[#656d76]"}`}>
-            {stats.topLanguages.slice(0, 5).join(" · ")}
-          </div>
-        )}
+          {/* Stats — icon + number only */}
+          {settings.showStats && (
+            <div
+              className="flex items-center mb-3 rounded-lg border overflow-hidden"
+              style={{ backgroundColor: C.surface, borderColor: C.border }}
+            >
+              {statItems.map(({ label, value, icon: Icon }, idx) => (
+                <div
+                  key={label}
+                  className="flex flex-1 items-center justify-center gap-1.5 px-3 py-2.5"
+                  style={idx > 0 ? { borderLeft: `1px solid ${C.border}` } : undefined}
+                >
+                  <Icon size={11} style={{ color: C.muted }} />
+                  <span
+                    className="text-sm font-bold tabular-nums"
+                    style={{ color: C.text }}
+                  >
+                    {fmt(value)}
+                  </span>
+                </div>
+              ))}
+            </div>
+          )}
 
-        {/* Contribution Graph */}
-        {settings.showContributionGraph && (
-          <div
-            className={`w-full overflow-x-auto overflow-y-hidden rounded-lg p-2.5 ${
-              isDark ? "bg-[#161b22]" : "bg-[#f6f8fa]"
-            }`}
-            style={{ direction: "rtl" }}
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="min-w-[650px] pr-2" style={{ direction: "ltr" }}>
+          {/* Contribution graph — fills card width, scrolls when wider */}
+          {settings.showContributionGraph && (
+            <div
+              className="w-full overflow-x-auto overflow-y-hidden rounded-lg border py-2.5 scrollbar-hide touch-pan-x scroll-smooth"
+              style={{
+                backgroundColor: C.surface,
+                borderColor: C.border,
+                direction: "rtl",
+                scrollbarWidth: "none",
+                msOverflowStyle: "none",
+                WebkitOverflowScrolling: "touch",
+              }}
+              onClick={(e) => e.stopPropagation()}
+              onMouseDown={(e) => e.stopPropagation()}
+              onTouchStart={(e) => e.stopPropagation()}
+            >
               <img
                 src={chartUrl}
-                alt="GitHub Contribution Graph"
-                className="w-full h-auto object-contain"
-                style={isDark ? { filter: "brightness(1.1)" } : {}}
+                alt="GitHub contribution graph"
+                className="block shrink-0 opacity-90 group-hover:opacity-100 transition-opacity duration-300"
+                style={{
+                  direction: "ltr",
+                  width: "max(100%, 620px)",
+                  height: 96,
+                  maxWidth: "none",
+                  objectFit: "contain",
+                  objectPosition: "left center",
+                }}
+                draggable={false}
               />
             </div>
-          </div>
-        )}
-      </div>
-    </a>
+          )}
+        </div>
+      </a>
+    </div>
   );
 };
 
