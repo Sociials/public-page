@@ -1,43 +1,81 @@
 import React from "react";
+import {
+  getPageNavIcon,
+  getPillClassName,
+  resolvePageHref,
+} from "./sitePageNav.js";
 
-const resolvePageHref = (page, username) => {
-  const path = page?.publicPath;
-  if (path && path !== "/" && path.split("/").filter(Boolean).length >= 2) {
-    return path;
-  }
-  const slug = String(page?.slug || "").toLowerCase();
-  const user = String(username || page?.username || "").toLowerCase();
-  if (user && slug && slug !== "main") {
-    return `/${user}/${slug}`;
-  }
-  return path || "#";
-};
-
-const PageSiteNav = ({ pages = [], username = "", textClass = "" }) => {
+/**
+ * Segmented pill navigation between a creator's pages (Links / Blog / Gallery).
+ *
+ * @param {object} props
+ * @param {Array} props.pages
+ * @param {string} [props.username]
+ * @param {string} [props.textClass]
+ * @param {string} [props.activeHref] - current path for active pill (editor preview)
+ * @param {string} [props.pendingHref] - path being navigated to (loading state)
+ * @param {React.ElementType} [props.LinkComponent] - e.g. Next.js Link on frontend
+ * @param {(href: string) => void} [props.onNavigate]
+ */
+const PageSiteNav = ({
+  pages = [],
+  username = "",
+  textClass = "",
+  activeHref = "",
+  pendingHref = null,
+  LinkComponent,
+  onNavigate,
+}) => {
   if (!pages.length) return null;
+
+  const LinkTag = LinkComponent || "a";
 
   return (
     <nav
-      className={`w-full mt-0.5 mb-2 md:mb-4 flex flex-wrap items-center justify-center gap-x-1 gap-y-1 text-[11px] md:text-xs font-medium ${textClass}`}
-      aria-label="More pages"
+      className="w-full mt-1 mb-2 md:mb-3 flex justify-center px-1"
+      aria-label="Site pages"
     >
-      {pages.map((page, index) => (
-        <React.Fragment key={page.publicPath || page.slug || index}>
-          {index > 0 && (
-            <span className="opacity-35 select-none px-0.5" aria-hidden="true">
-              ·
-            </span>
-          )}
-          <a
-            href={resolvePageHref(page, username)}
-            className="opacity-75 hover:opacity-100 underline underline-offset-[3px] decoration-black/25 hover:decoration-black/60 transition-opacity"
-          >
-            {page.title}
-          </a>
-        </React.Fragment>
-      ))}
+      <div
+        className={`inline-flex max-w-full flex-wrap items-center justify-center gap-1 rounded-2xl border-2 border-black/10 bg-black/[0.04] p-1 ${textClass}`}
+        role="tablist"
+      >
+        {pages.map((page, index) => {
+          const href = resolvePageHref(page, username);
+          const isActive = Boolean(activeHref && activeHref === href);
+          const isPending = Boolean(pendingHref && pendingHref === href && !isActive);
+          const Icon = getPageNavIcon(page);
+          const pillClass = getPillClassName({ isActive, isPending, textClass: "" });
+
+          const handleClick = (e) => {
+            if (isActive) {
+              e.preventDefault();
+              return;
+            }
+            if (href !== activeHref) {
+              onNavigate?.(href);
+            }
+          };
+
+          return (
+            <LinkTag
+              key={page.publicPath || page.slug || index}
+              href={href}
+              onClick={handleClick}
+              className={pillClass}
+              role="tab"
+              aria-selected={isActive}
+              aria-current={isActive ? "page" : undefined}
+              title={page.title}
+            >
+              <Icon className="shrink-0 text-[11px] opacity-80" aria-hidden />
+              <span className="truncate">{page.title}</span>
+            </LinkTag>
+          );
+        })}
+      </div>
     </nav>
   );
 };
 
 export default PageSiteNav;
+export { resolvePageHref, getPageNavIcon, getPillClassName } from "./sitePageNav.js";

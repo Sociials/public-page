@@ -12,7 +12,10 @@ import {
   FaSoundcloud,
   FaLink,
   FaCheck,
+  FaWhatsapp,
+  FaPhone,
 } from "react-icons/fa6";
+import { getLinkAnchorProps, resolveLinkHref } from "./linkHref.js";
 
 // 1. Helper to get YouTube Thumbnail URL
 const getYouTubeThumbnail = (url) => {
@@ -44,6 +47,10 @@ const getPlatformIcon = (type) => {
       return <FaGithub className="text-black" />;
     case "twitch":
       return <FaTwitch className="text-[#9146FF]" />;
+    case "whatsapp":
+      return <FaWhatsapp className="text-[#25D366]" />;
+    case "phone":
+      return <FaPhone className="text-[#15F5BA]" />;
     case "soundcloud":
       return <FaSoundcloud className="text-[#FF5500]" />;
     default:
@@ -54,9 +61,9 @@ const getPlatformIcon = (type) => {
 const LinkCard = React.memo(function LinkCard({ link, theme, onClick, layout = "default" }) {
   const [copied, setCopied] = React.useState(false);
 
-  // Safe URL
-  const rawUrl = link?.url || "";
-  const safeUrl = rawUrl.startsWith("http") ? rawUrl : `https://${rawUrl}`;
+  // Safe URL + anchor attributes (tel: / wa.me supported)
+  const anchorProps = getLinkAnchorProps(link);
+  const safeUrl = anchorProps.href;
 
   // --- SHARE HANDLER ---
   const handleShare = (e) => {
@@ -86,7 +93,7 @@ const LinkCard = React.memo(function LinkCard({ link, theme, onClick, layout = "
 
   // Priority 2: Auto-detect YouTube thumbnail if no custom cover exists
   if (!displayImage && link.type === "youtube") {
-    displayImage = getYouTubeThumbnail(safeUrl);
+    displayImage = getYouTubeThumbnail(resolveLinkHref(link?.url));
   }
 
   // --- HELPER: RENDER ICON (Custom Image OR Default SVG) ---
@@ -208,8 +215,8 @@ const LinkCard = React.memo(function LinkCard({ link, theme, onClick, layout = "
     return (
       <a
         href={safeUrl}
-        target="_blank"
-        rel="noopener noreferrer"
+        target={anchorProps.target}
+        rel={anchorProps.rel}
         onClick={onClick}
         style={carouselStyle}
         className={`
@@ -271,8 +278,8 @@ const LinkCard = React.memo(function LinkCard({ link, theme, onClick, layout = "
       return (
         <a
           href={safeUrl}
-          target="_blank"
-          rel="noopener noreferrer"
+          target={anchorProps.target}
+          rel={anchorProps.rel}
           onClick={onClick}
           style={isCustom ? customStyle : staticMediaBorderStyle}
           className={`
@@ -324,8 +331,8 @@ const LinkCard = React.memo(function LinkCard({ link, theme, onClick, layout = "
       return (
         <a
           href={safeUrl}
-          target="_blank"
-          rel="noopener noreferrer"
+          target={anchorProps.target}
+          rel={anchorProps.rel}
           onClick={onClick}
           style={isCustom ? customStyle : staticMediaBorderStyle}
           className={`
@@ -383,8 +390,8 @@ const LinkCard = React.memo(function LinkCard({ link, theme, onClick, layout = "
       return (
         <a
           href={safeUrl}
-          target="_blank"
-          rel="noopener noreferrer"
+          target={anchorProps.target}
+          rel={anchorProps.rel}
           onClick={onClick}
           style={isCustom ? customStyle : staticMediaBorderStyle}
           className={`
@@ -445,6 +452,8 @@ const LinkCard = React.memo(function LinkCard({ link, theme, onClick, layout = "
     "twitter",
     "github",
     "linkedin",
+    "whatsapp",
+    "phone",
   ].includes(link.type);
 
   if (isRichPlatform) {
@@ -453,8 +462,8 @@ const LinkCard = React.memo(function LinkCard({ link, theme, onClick, layout = "
     return (
       <a
         href={safeUrl}
-        target="_blank"
-        rel="noopener noreferrer"
+        target={anchorProps.target}
+        rel={anchorProps.rel}
         onClick={onClick}
         style={isCustom ? customStyle : staticRichRowStyle}
         className={`
@@ -496,8 +505,8 @@ const LinkCard = React.memo(function LinkCard({ link, theme, onClick, layout = "
   return (
     <a
       href={safeUrl}
-      target="_blank"
-      rel="noopener noreferrer"
+      target={anchorProps.target}
+      rel={anchorProps.rel}
       onClick={onClick}
       style={customStyle}
       className={`

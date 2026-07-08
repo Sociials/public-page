@@ -162,6 +162,29 @@ const NewsletterForm = ({ user, activeTheme, apiBaseUrl = "" }) => {
               <p className="text-xs text-red-500 font-bold mt-1">{error}</p>
             )}
 
+            <p className="text-[10px] sm:text-xs text-gray-500 leading-snug text-left px-1">
+              By subscribing, you agree your email may be stored by Sociials and
+              shared with this page&apos;s creator for their newsletter. See{" "}
+              <a
+                href="https://sociials.com/privacy-policy"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="underline font-semibold text-gray-700 hover:text-black"
+              >
+                Privacy Policy
+              </a>
+              {" "}(India users:{" "}
+              <a
+                href="https://sociials.com/privacy-policy#india-dpdp"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="underline font-semibold text-gray-700 hover:text-black"
+              >
+                India section
+              </a>
+              ).
+            </p>
+
             <button
               type="submit"
               disabled={loading}

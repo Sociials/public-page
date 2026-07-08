@@ -17,6 +17,8 @@ import SupportButton from "./SupportButton.jsx";
 import MediaEmbed from "./MediaEmbed.jsx";
 import ShopGrid from "./ShopGrid.jsx";
 import ShopViewToggle from "./ShopViewToggle.jsx";
+import SitePagesOverflowMenu from "./SitePagesOverflowMenu.jsx";
+import SitePagesFooterLinks from "./SitePagesFooterLinks.jsx";
 import InstagramFeed from "./InstagramFeed.jsx";
 import YouTubeFeed from "./YouTubeFeed.jsx";
 import NewsletterForm from "./NewsletterForm.jsx";
@@ -24,7 +26,6 @@ import GitHubStats from "./GitHubStats.jsx";
 import { buildLinkBlocks } from "./linkBlocks.js";
 import PageBlogView from "./PageBlogView.jsx";
 import PageGalleryView from "./PageGalleryView.jsx";
-import PageSiteNav from "./PageSiteNav.jsx";
 import {
   BANNER_FLOATING_CLASS,
   BANNER_FULL_BLEED_CLASS,
@@ -34,6 +35,8 @@ import ShareIcon from "./ShareIcon.jsx";
 import HighlightsRow from "./HighlightsRow.jsx";
 import StoryViewer from "./StoryViewer.jsx";
 import LockedPageView from "./LockedPageView.jsx";
+import AdultContentGate from "./AdultContentGate.jsx";
+import { isAgeVerified, setAgeVerified as persistAgeVerified } from "./ageGate.js";
 
 /**
  * Public bio page shell. Wire app-specific behavior via props.
@@ -45,6 +48,7 @@ import LockedPageView from "./LockedPageView.jsx";
  * @param {({ pageId: string, linkId: string }) => void} [props.onTrackClick]
  * @param {string} [props.apiBaseUrl] - API origin for newsletter submit
  * @param {({ isOpen: boolean, onClose: () => void, pageId: string, username: string }) => React.ReactNode} [props.renderReportModal]
+ * @param {boolean} [props.skipAgeGate] - Skip 18+ gate (editor preview)
  */
 const UniversalTheme = ({
   user,
@@ -54,11 +58,33 @@ const UniversalTheme = ({
   onTrackClick,
   apiBaseUrl = "",
   renderReportModal,
+  skipAgeGate = false,
+  sitePageLinkComponent,
+  onSitePageNavigate,
+  sitePagePendingHref = null,
 }) => {
   const [isCopied, setIsCopied] = useState(false);
   const [isReportOpen, setIsReportOpen] = useState(false);
   const [activeStoryIndex, setActiveStoryIndex] = useState(null); // Changed to Index
   const [viewMode, setViewMode] = useState("links"); // New state
+  // Never read sessionStorage in useState initializer — SSR and client must match on first paint.
+  const [ageGateHydrated, setAgeGateHydrated] = useState(false);
+  const [ageVerified, setAgeVerified] = useState(false);
+
+  useEffect(() => {
+    const verified =
+      skipAgeGate || !user?.isAdultContent || isAgeVerified(user?.username);
+    setAgeVerified(verified);
+    setAgeGateHydrated(true);
+  }, [user?.username, user?.isAdultContent, skipAgeGate]);
+
+  const onTrackViewRef = useRef(onTrackView);
+  onTrackViewRef.current = onTrackView;
+
+  useEffect(() => {
+    if (!user?._id || (user.isAdultContent && !skipAgeGate && !ageVerified)) return;
+    onTrackViewRef.current?.(user._id);
+  }, [user?._id, user?.isAdultContent, skipAgeGate, ageVerified]);
 
   if (!user?.username) {
     return (
@@ -76,6 +102,22 @@ const UniversalTheme = ({
         homeLogoSrc={homeLogoSrc}
       />
     );
+  }
+
+  if (user.isAdultContent && !skipAgeGate) {
+    if (!ageGateHydrated || !ageVerified) {
+      return (
+        <AdultContentGate
+          username={user.username}
+          homeLogoSrc={homeLogoSrc}
+          onConfirm={() => {
+            persistAgeVerified(user.username);
+            setAgeVerified(true);
+          }}
+          onLeave={() => onGoHome?.()}
+        />
+      );
+    }
   }
 
   const pageType = user.pageType || "links";
@@ -143,16 +185,6 @@ const UniversalTheme = ({
     ? customButton.backgroundColor || "#15F5BA"
     : "#15F5BA";
   const highlightCtaText = isCustom ? customButton.textColor || "#000000" : "#000000";
-
-  const onTrackViewRef = useRef(onTrackView);
-  onTrackViewRef.current = onTrackView;
-
-  useEffect(() => {
-    const pageId = user?._id;
-    if (pageId) {
-      onTrackViewRef.current?.(pageId);
-    }
-  }, [user?._id]);
 
   const handleLinkClick = (link) => {
     if (onTrackClick && user?._id && link?._id) {
@@ -234,8 +266,44 @@ const UniversalTheme = ({
     </div>
   );
 
-  const currentProfilePic = user?.profilePicture;
+  const hasShopItems =
+    user?.shop?.filter((s) => s.isActive !== false)?.length > 0;
+  const sitePages = user?.sitePages || [];
+  const hasMultiPageNav = sitePages.length > 1;
+  const activeSiteHref = user.publicPath || (user.username ? `/${user.username}` : "");
 
+  const siteNavProps = {
+    sitePages,
+    username: user.username,
+    activeHref: activeSiteHref,
+    pendingHref: sitePagePendingHref,
+    LinkComponent: sitePageLinkComponent,
+    onPageNavigate: onSitePageNavigate,
+    textClass,
+  };
+
+  const renderProfileBar = () => {
+    const showShopToggle = hasShopItems && showLinksContent;
+    const showPagesMenu = hasMultiPageNav;
+    if (!showShopToggle && !showPagesMenu) return null;
+
+    return (
+      <div className="mt-3 mb-4 flex w-full items-center justify-center gap-2 px-4 md:mt-6 md:mb-6">
+        {showShopToggle && (
+          <ShopViewToggle
+            viewMode={viewMode}
+            onChange={setViewMode}
+            className="min-w-0 flex-1 max-w-[280px]"
+          />
+        )}
+        {showPagesMenu && (
+          <SitePagesOverflowMenu {...siteNavProps} className="shrink-0" />
+        )}
+      </div>
+    );
+  };
+
+  const currentProfilePic = user?.profilePicture;
   const hasBanner = user?.banner?.enabled && user?.banner?.image;
   const isFloatingBanner = hasBanner && user.banner.style === "floating";
   const isFullBleedBanner = hasBanner && !isFloatingBanner;
@@ -425,17 +493,16 @@ const UniversalTheme = ({
               <SocialRow socials={user.socials} theme={effectiveTheme} />
             </div>
           )}
-          {showLinksContent && user?.sitePages?.length > 0 && (
-            <PageSiteNav
-              pages={user.sitePages}
-              username={user.username}
-              textClass={textClass}
-            />
-          )}
         </article>
 
         {/* Content wrapper with horizontal padding */}
-        <div className="px-4">
+        <div className="px-4 min-w-0 w-full">
+
+        {!showLinksContent && hasMultiPageNav && (
+          <div className="mt-1 mb-3 flex justify-center">
+            <SitePagesOverflowMenu {...siteNavProps} />
+          </div>
+        )}
 
         {!showLinksContent && pageType === "blog" && (
           <PageBlogView
@@ -482,18 +549,18 @@ const UniversalTheme = ({
           <GitHubStats githubData={user.integrations.github} theme={effectiveTheme} />
         )}
 
-        {user?.shop?.filter(s => s.isActive !== false)?.length > 0 && (
-          <ShopViewToggle
-            viewMode={viewMode}
-            onChange={setViewMode}
-            className="mt-3 mb-4 md:mt-6 md:mb-6 px-4"
-          />
-        )}
+        {renderProfileBar()}
 
         {/* --- E. MAIN CONTENT (LINKS OR SHOP) --- */}
         {viewMode === 'shop' ? (
           <div className="w-full mt-2 mb-8">
-            <ShopGrid items={user.shop} />
+            {hasShopItems ? (
+              <ShopGrid items={user.shop} />
+            ) : (
+              <p className={`text-center opacity-50 py-10 font-mono text-sm ${textClass}`}>
+                No shop items yet.
+              </p>
+            )}
           </div>
         ) : (
           <div className="w-full min-w-0 flex flex-col gap-3 md:gap-4 mt-1 md:mt-2 mb-6 md:mb-8">
@@ -613,6 +680,8 @@ const UniversalTheme = ({
 
         {/* --- G. FOOTER CTA --- */}
         <div className="mt-auto flex flex-col items-center justify-center pb-6">
+          {hasMultiPageNav && <SitePagesFooterLinks {...siteNavProps} />}
+
           {!hideBranding && (
             <button
               className="group relative mb-4 inline-flex items-center justify-center gap-2"

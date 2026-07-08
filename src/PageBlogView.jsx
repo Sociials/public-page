@@ -23,8 +23,8 @@ const PageBlogView = ({
   return (
     <article className={layout.wrapper} style={textStyle}>
       <div className={layout.inner}>
-        <header className={`w-full flex flex-col ${style.align === "center" ? "items-center" : style.align === "right" ? "items-end" : "items-start"}`}>
-          <h2 className={`${layout.title} ${fontClass} ${textClass}`} style={textStyle}>
+        <header className={`w-full min-w-0 max-w-full flex flex-col ${style.align === "center" ? "items-center" : style.align === "right" ? "items-end" : "items-start"}`}>
+          <h2 className={`${layout.title} w-full min-w-0 ${fontClass} ${textClass}`} style={textStyle}>
             {title}
           </h2>
           {subtitle && (
