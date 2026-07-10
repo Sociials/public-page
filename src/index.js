@@ -33,6 +33,7 @@ export { default as ShopGrid } from "./ShopGrid.jsx";
 export { default as ShopViewToggle } from "./ShopViewToggle.jsx";
 export { default as SitePagesOverflowMenu } from "./SitePagesOverflowMenu.jsx";
 export { default as SitePagesFooterLinks } from "./SitePagesFooterLinks.jsx";
+export { default as SitePagesHamburgerMenu } from "./SitePagesHamburgerMenu.jsx";
 export { default as NewsletterForm } from "./NewsletterForm.jsx";
 export { default as GitHubStats } from "./GitHubStats.jsx";
 export { default as YouTubeFeed } from "./YouTubeFeed.jsx";

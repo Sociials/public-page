@@ -1,5 +1,5 @@
 import React from "react";
-import { FaFacebook } from "react-icons/fa";
+import { FaFacebook, FaTwitch, FaDiscord, FaSnapchat, FaPinterest, FaSpotify, FaTelegram, FaReddit, FaWhatsapp } from "react-icons/fa";
 import {
   FaInstagram,
   FaXTwitter,
@@ -10,6 +10,12 @@ import {
   FaYoutube,
 } from "react-icons/fa6";
 import { SiBluesky, SiThreads } from "react-icons/si";
+import {
+  CUSTOM_BTN_INTERACT_CLASS,
+  STATIC_BTN_INTERACT_CLASS,
+  ensureButtonInteractStyles,
+  getCustomButtonStyle,
+} from "./buttonInteraction.js";
 
 const iconMap = {
   youtube: { icon: FaYoutube, prefix: "https://youtube.com/" },
@@ -22,59 +28,85 @@ const iconMap = {
   threads: { icon: SiThreads, prefix: "https://www.threads.com/@" },
   bluesky: { icon: SiBluesky, prefix: "https://bsky.app/profile/" },
   email: { icon: FaEnvelope, prefix: "mailto:" },
+  twitch: { icon: FaTwitch, prefix: "https://twitch.tv/" },
+  discord: { icon: FaDiscord, prefix: "https://discord.gg/" },
+  snapchat: { icon: FaSnapchat, prefix: "https://www.snapchat.com/add/" },
+  pinterest: { icon: FaPinterest, prefix: "https://www.pinterest.com/" },
+  spotify: { icon: FaSpotify, prefix: "https://open.spotify.com/user/" },
+  telegram: { icon: FaTelegram, prefix: "https://t.me/" },
+  reddit: { icon: FaReddit, prefix: "https://www.reddit.com/user/" },
+  whatsapp: { icon: FaWhatsapp, prefix: "https://wa.me/" },
 };
 
-const SocialRow = React.memo(function SocialRow({ socials, theme }) {
-  // --- THEME RESOLUTION LOGIC ---
+/** Resolve stored username or full URL into a clickable href. */
+export const resolveSocialHref = (platform, value, prefix) => {
+  if (!value || typeof value !== "string") return null;
+  const trimmed = value.trim();
+  if (!trimmed) return null;
+
+  if (platform === "email") {
+    const email = trimmed.replace(/^mailto:/i, "");
+    return email ? `mailto:${email}` : null;
+  }
+
+  if (/^https?:\/\//i.test(trimmed)) return trimmed;
+
+  const handle = trimmed.replace(/^@+/, "");
+  if (!handle || !prefix) return null;
+  return prefix + handle;
+};
+
+const SocialRow = React.memo(function SocialRow({ socials, theme, align = "center" }) {
   const isCustom = theme?.isCustom;
   const btnConfig = theme?.button;
 
-  // 1. Fallback / Base Classes
-  // If custom, we only want the transitions. If preset, we use the buttonClass.
-  const buttonClass = isCustom
-    ? "transition-transform hover:-translate-y-1 hover:shadow-none"
-    : theme?.buttonClass ||
-      "bg-white border-2 border-black shadow-[4px_4px_0px_#000]";
+  React.useEffect(() => {
+    ensureButtonInteractStyles();
+  }, []);
 
-  // 2. Custom Style Object (Only for Custom Theme)
+  const interactClass = isCustom
+    ? CUSTOM_BTN_INTERACT_CLASS
+    : STATIC_BTN_INTERACT_CLASS;
+
+  const buttonClass = isCustom
+    ? interactClass
+    : `${theme?.buttonClass || "bg-white border-2 border-black shadow-[4px_4px_0px_#000]"} ${interactClass}`;
+
   const customStyle = isCustom
-    ? {
-        backgroundColor:
-          btnConfig.style === "outline"
-            ? "transparent"
-            : btnConfig.backgroundColor,
-        color:
-          btnConfig.style === "outline"
-            ? btnConfig.backgroundColor
-            : btnConfig.textColor,
-        border: btnConfig.style.includes("shadow")
-          ? "2px solid black"
-          : `2px solid ${btnConfig.backgroundColor}`,
-        // Social Icons: Pill = Circle (50%), Rounded = 8px, Sharp = 0px
-        borderRadius:
+    ? getCustomButtonStyle(btnConfig, {
+        radius:
           btnConfig.shape === "pill"
             ? "50%"
             : btnConfig.shape === "rounded"
               ? "8px"
               : "0px",
-        // Shadows (Slightly smaller for social icons looks better, but keeping consistent logic)
-        boxShadow:
+        shadow:
           btnConfig.style === "hard-shadow"
             ? `3px 3px 0px ${btnConfig.shadowColor}`
             : btnConfig.style === "soft-shadow"
               ? `0 3px 10px ${btnConfig.shadowColor}40`
               : "none",
-      }
+      })
     : {};
 
+  const justifyClass =
+    align === "left"
+      ? "justify-start"
+      : align === "right"
+        ? "justify-end"
+        : "justify-center";
+
   return (
-    <div className="flex flex-wrap justify-center gap-2 md:gap-3 mt-0">
-      {Object.entries(socials).map(([platform, handle]) => {
+    <div className={`flex flex-wrap ${justifyClass} gap-2 md:gap-3 mt-0`}>
+      {Object.entries(socials || {}).map(([platform, handle]) => {
         if (!handle) return null;
 
         const config = iconMap[platform];
+        if (!config) return null;
+
         const Icon = config.icon;
-        const url = config.prefix + handle;
+        const url = resolveSocialHref(platform, handle, config.prefix);
+        if (!url) return null;
 
         return (
           <a
@@ -90,10 +122,7 @@ const SocialRow = React.memo(function SocialRow({ socials, theme }) {
               ${!isCustom ? "!rounded-full" : ""} 
             `}
           >
-            {/* Note: We conditionally apply !rounded-full only if NOT custom. 
-                If custom, the inline style.borderRadius takes over. */}
-
-            <Icon className="text-sm md:text-base group-hover:scale-110 transition-transform" />
+            <Icon className="text-sm md:text-base transition-opacity duration-200 group-hover:opacity-90" />
           </a>
         );
       })}

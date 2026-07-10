@@ -14,8 +14,16 @@ import {
   FaCheck,
   FaWhatsapp,
   FaPhone,
+  FaCalendarCheck,
 } from "react-icons/fa6";
 import { getLinkAnchorProps, resolveLinkHref } from "./linkHref.js";
+import {
+  CUSTOM_BTN_INTERACT_CLASS,
+  STATIC_BTN_INTERACT_CLASS,
+  ensureButtonInteractStyles,
+  getCustomButtonColors,
+  getCustomButtonStyle,
+} from "./buttonInteraction.js";
 
 // 1. Helper to get YouTube Thumbnail URL
 const getYouTubeThumbnail = (url) => {
@@ -51,6 +59,8 @@ const getPlatformIcon = (type) => {
       return <FaWhatsapp className="text-[#25D366]" />;
     case "phone":
       return <FaPhone className="text-[#15F5BA]" />;
+    case "booking":
+      return <FaCalendarCheck className="text-[#FF6B6B]" />;
     case "soundcloud":
       return <FaSoundcloud className="text-[#FF5500]" />;
     default:
@@ -60,6 +70,10 @@ const getPlatformIcon = (type) => {
 
 const LinkCard = React.memo(function LinkCard({ link, theme, onClick, layout = "default" }) {
   const [copied, setCopied] = React.useState(false);
+
+  React.useEffect(() => {
+    ensureButtonInteractStyles();
+  }, []);
 
   // Safe URL + anchor attributes (tel: / wa.me supported)
   const anchorProps = getLinkAnchorProps(link);
@@ -111,7 +125,7 @@ const LinkCard = React.memo(function LinkCard({ link, theme, onClick, layout = "
     // 2. Default Platform Icon
     const icon = getPlatformIcon(link.type);
 
-    // If Standard Button, strip default brand colors to inherit button text color
+    // Standard button: inherit theme text color (no brand red/etc.)
     if (context === "button") {
       return React.cloneElement(icon, { className: "" });
     }
@@ -126,42 +140,38 @@ const LinkCard = React.memo(function LinkCard({ link, theme, onClick, layout = "
   const staticMediaBorderStyle =
     !isCustom && displayImage ? { borderRadius: "12px" } : undefined;
 
-  // 1. Base Classes
+  const interactClass = isCustom
+    ? CUSTOM_BTN_INTERACT_CLASS
+    : STATIC_BTN_INTERACT_CLASS;
+
+  // 1. Base Classes (no lift animation — interactClass handles hover)
   let buttonClass = isCustom
-    ? "transition-transform hover:-translate-y-1 active:scale-95"
-    : theme?.buttonClass ||
-    "bg-white border-2 border-black shadow-[4px_4px_0px_#000]";
+    ? interactClass
+    : `${theme?.buttonClass || "bg-white border-2 border-black shadow-[4px_4px_0px_#000]"} ${interactClass}`;
+
+  const customColors = isCustom ? getCustomButtonColors(btnConfig) : null;
 
   // 2. Custom Style Object
   const customStyle = isCustom
     ? {
-      backgroundColor:
-        btnConfig.style === "outline"
-          ? "transparent"
-          : btnConfig.backgroundColor,
-      color:
-        btnConfig.style === "outline"
-          ? btnConfig.backgroundColor
-          : btnConfig.textColor,
-      border: btnConfig.style.includes("shadow")
-        ? "2px solid black"
-        : `2px solid ${btnConfig.backgroundColor}`,
-      borderRadius:
-        btnConfig.shape === "pill"
-          ? displayImage
-            ? "22px"
-            : "999px"
-          : btnConfig.shape === "rounded"
-            ? "12px"
-            : "0px",
-      boxShadow:
-        btnConfig.style === "hard-shadow"
-          ? `4px 4px 0px ${btnConfig.shadowColor}`
-          : btnConfig.style === "soft-shadow"
-            ? `0 4px 15px ${btnConfig.shadowColor}40`
-            : "none",
-      fontFamily: theme.fontFamily,
-    }
+        ...getCustomButtonStyle(btnConfig, {
+          radius:
+            btnConfig.shape === "pill"
+              ? displayImage
+                ? "22px"
+                : "999px"
+              : btnConfig.shape === "rounded"
+                ? "12px"
+                : "0px",
+          shadow:
+            btnConfig.style === "hard-shadow"
+              ? `4px 4px 0px ${btnConfig.shadowColor}`
+              : btnConfig.style === "soft-shadow"
+                ? `0 4px 15px ${btnConfig.shadowColor}40`
+                : "none",
+        }),
+        fontFamily: theme.fontFamily,
+      }
     : {};
 
   // --- SHARE BUTTON COMPONENT (Reusable) ---
@@ -221,7 +231,7 @@ const LinkCard = React.memo(function LinkCard({ link, theme, onClick, layout = "
         style={carouselStyle}
         className={`
           relative block w-full h-[168px] sm:h-[180px] overflow-hidden group
-          transition-transform hover:-translate-y-0.5 active:scale-[0.98]
+          ${interactClass}
           ${isCustom ? "" : "border-2 border-black shadow-[3px_3px_0px_#000] bg-white"}
         `}
       >
@@ -285,7 +295,7 @@ const LinkCard = React.memo(function LinkCard({ link, theme, onClick, layout = "
           className={`
             relative block w-full ${marginClass} !p-0 overflow-hidden group 
             aspect-[16/9] sm:aspect-[2/1] 
-            transition-transform hover:-translate-y-1 hover:shadow-none
+            ${interactClass}
             ${buttonClass}
           `}
         >
@@ -337,7 +347,7 @@ const LinkCard = React.memo(function LinkCard({ link, theme, onClick, layout = "
           style={isCustom ? customStyle : staticMediaBorderStyle}
           className={`
             block w-full ${marginClass} !p-0 overflow-hidden group 
-            transition-transform hover:-translate-y-1 active:scale-95
+            ${interactClass}
             flex flex-col
             ${buttonClass}
           `}
@@ -396,7 +406,7 @@ const LinkCard = React.memo(function LinkCard({ link, theme, onClick, layout = "
           style={isCustom ? customStyle : staticMediaBorderStyle}
           className={`
             flex items-center w-full ${marginClass} !p-3 overflow-hidden group gap-4
-            transition-transform hover:-translate-y-1 active:scale-95
+            ${interactClass}
             ${buttonClass}
           `}
         >
@@ -454,6 +464,7 @@ const LinkCard = React.memo(function LinkCard({ link, theme, onClick, layout = "
     "linkedin",
     "whatsapp",
     "phone",
+    "booking",
   ].includes(link.type);
 
   if (isRichPlatform) {
@@ -468,7 +479,7 @@ const LinkCard = React.memo(function LinkCard({ link, theme, onClick, layout = "
         style={isCustom ? customStyle : staticRichRowStyle}
         className={`
           flex items-center w-full ${marginClass} !p-0 overflow-hidden group
-          transition-transform hover:-translate-y-1 active:scale-95
+          ${interactClass}
           ${buttonClass}
         `}
       >
@@ -477,7 +488,7 @@ const LinkCard = React.memo(function LinkCard({ link, theme, onClick, layout = "
           className={`w-14 h-14 flex items-center justify-center text-xl border-r-2 overflow-hidden ${!isCustom ? "bg-gray-50 border-black/5" : ""
             }`}
           style={
-            isCustom ? { borderColor: customStyle.color, opacity: 0.8 } : {}
+            isCustom ? { borderColor: customColors?.color, opacity: 0.8 } : {}
           }
         >
           {renderIcon("row")}
@@ -487,7 +498,7 @@ const LinkCard = React.memo(function LinkCard({ link, theme, onClick, layout = "
         <div className="flex-1 px-4 text-left overflow-hidden">
           <p className="font-bold text-sm truncate">{link.title}</p>
           <p className="text-[10px] uppercase tracking-widest font-bold opacity-60">
-            {link.type}
+            {link.type === "booking" ? "book a call" : link.type}
           </p>
         </div>
 
@@ -511,7 +522,7 @@ const LinkCard = React.memo(function LinkCard({ link, theme, onClick, layout = "
       style={customStyle}
       className={`
         relative block w-full ${marginClass} py-4 px-6 text-center font-bold text-lg 
-        transition-transform hover:-translate-y-1 active:scale-95
+        ${interactClass}
         flex items-center justify-center group
         ${buttonClass}
       `}

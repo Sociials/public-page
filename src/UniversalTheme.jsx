@@ -17,8 +17,7 @@ import SupportButton from "./SupportButton.jsx";
 import MediaEmbed from "./MediaEmbed.jsx";
 import ShopGrid from "./ShopGrid.jsx";
 import ShopViewToggle from "./ShopViewToggle.jsx";
-import SitePagesOverflowMenu from "./SitePagesOverflowMenu.jsx";
-import SitePagesFooterLinks from "./SitePagesFooterLinks.jsx";
+import SitePagesHamburgerMenu from "./SitePagesHamburgerMenu.jsx";
 import InstagramFeed from "./InstagramFeed.jsx";
 import YouTubeFeed from "./YouTubeFeed.jsx";
 import NewsletterForm from "./NewsletterForm.jsx";
@@ -37,6 +36,7 @@ import StoryViewer from "./StoryViewer.jsx";
 import LockedPageView from "./LockedPageView.jsx";
 import AdultContentGate from "./AdultContentGate.jsx";
 import { isAgeVerified, setAgeVerified as persistAgeVerified } from "./ageGate.js";
+import { ensureButtonInteractStyles } from "./buttonInteraction.js";
 
 /**
  * Public bio page shell. Wire app-specific behavior via props.
@@ -70,6 +70,10 @@ const UniversalTheme = ({
   // Never read sessionStorage in useState initializer — SSR and client must match on first paint.
   const [ageGateHydrated, setAgeGateHydrated] = useState(false);
   const [ageVerified, setAgeVerified] = useState(false);
+
+  useEffect(() => {
+    ensureButtonInteractStyles();
+  }, []);
 
   useEffect(() => {
     const verified =
@@ -143,17 +147,37 @@ const UniversalTheme = ({
 
   const customContainerStyle = isCustom
     ? {
-        backgroundColor:
-          customBackground.type === "color"
-            ? customBackground.value || "#F3F2EC"
-            : "transparent",
+        // Page shell carries the background; keep text color for inheritance
         color: customButton.textColor || "#000000",
       }
     : {};
 
   const globalFontStyle = { fontFamily: pageFontStack };
 
-  const outerBgClass = isCustom ? "bg-gray-100" : staticTheme.bgClass;
+  // Full-viewport background matches the user's theme (no gray frame on desktop)
+  const pageShellStyle = (() => {
+    const base = { ...globalFontStyle };
+    if (!isCustom) return base;
+
+    if (customBackground.type === "image" && customBackground.image) {
+      return {
+        ...base,
+        backgroundColor: "#0a0a0a",
+        backgroundImage: `url(${customBackground.image})`,
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+      };
+    }
+    if (customBackground.type === "gradient" && customBackground.value) {
+      return { ...base, background: customBackground.value };
+    }
+    return {
+      ...base,
+      backgroundColor: customBackground.value || "#F3F2EC",
+    };
+  })();
+
+  const outerBgClass = isCustom ? "" : staticTheme.bgClass;
   // If custom, we DON'T want a text class from static theme. 
   // We rely on 'customContainerStyle' to inherit color.
   // BUT we need to ensure specific elements reset/inherit properly.
@@ -280,25 +304,21 @@ const UniversalTheme = ({
     LinkComponent: sitePageLinkComponent,
     onPageNavigate: onSitePageNavigate,
     textClass,
+    isCustom,
+    customButton,
   };
 
   const renderProfileBar = () => {
     const showShopToggle = hasShopItems && showLinksContent;
-    const showPagesMenu = hasMultiPageNav;
-    if (!showShopToggle && !showPagesMenu) return null;
+    if (!showShopToggle) return null;
 
     return (
       <div className="mt-3 mb-4 flex w-full items-center justify-center gap-2 px-4 md:mt-6 md:mb-6">
-        {showShopToggle && (
-          <ShopViewToggle
-            viewMode={viewMode}
-            onChange={setViewMode}
-            className="min-w-0 flex-1 max-w-[280px]"
-          />
-        )}
-        {showPagesMenu && (
-          <SitePagesOverflowMenu {...siteNavProps} className="shrink-0" />
-        )}
+        <ShopViewToggle
+          viewMode={viewMode}
+          onChange={setViewMode}
+          className="min-w-0 flex-1 max-w-[280px]"
+        />
       </div>
     );
   };
@@ -325,6 +345,10 @@ const UniversalTheme = ({
       )}
 
       <div className="flex items-center gap-2">
+        {hasMultiPageNav && (
+          <SitePagesHamburgerMenu {...siteNavProps} overlay={overlay} />
+        )}
+
         <SupportButton
           monetization={user?.monetization}
           overlay={overlay}
@@ -352,7 +376,7 @@ const UniversalTheme = ({
 
   return (
     <div
-      style={globalFontStyle}
+      style={pageShellStyle}
       className={`h-screen w-full flex flex-col items-center justify-center transition-all duration-300 ${outerBgClass}`}
     >
       <ThemeFontLoader user={user} />
@@ -365,13 +389,12 @@ const UniversalTheme = ({
 
       <div
         style={customContainerStyle}
-        className={`w-full max-w-md flex flex-col 
+        className={`w-full max-w-lg md:max-w-2xl flex flex-col 
         relative
-        h-screen md:h-[calc(100vh-4rem)] 
+        h-screen md:h-[calc(100vh-2.5rem)] 
         overflow-hidden 
-        md:rounded-[40px] md:my-8 
-        transition-all duration-300
-        ${isCustom ? "shadow-2xl" : ""}`}
+        md:rounded-2xl md:my-5 
+        transition-all duration-300`}
       >
       <ProfileScrollContainer
         className="h-full w-full"
@@ -382,7 +405,7 @@ const UniversalTheme = ({
 
         {/* Full-bleed banner (centered / discord) */}
         {isFullBleedBanner && (
-          <div className="w-full shrink-0 relative z-0">
+          <div className="w-full shrink-0 relative z-0 md:mt-3">
             <div className="relative">
               <div
                 className={BANNER_FULL_BLEED_CLASS}
@@ -464,15 +487,6 @@ const UniversalTheme = ({
             </h2>
           )}
 
-          {user?.primaryPagePath && (
-            <a
-              href={user.primaryPagePath}
-              className={`mt-2 text-sm font-bold underline opacity-80 hover:opacity-100 ${textClass}`}
-            >
-              ← All links
-            </a>
-          )}
-
           {user?.bio && (
             <p 
               className={`mt-1.5 md:mt-3 text-sm md:text-base opacity-90 break-words max-w-sm mx-auto md:mx-0 whitespace-pre-wrap leading-snug md:leading-relaxed font-medium line-clamp-3 md:line-clamp-none
@@ -490,19 +504,17 @@ const UniversalTheme = ({
           {/* --- SOCIAL ICONS (inside article to follow banner alignment) --- */}
           {user?.socials && (
             <div className="mt-2.5 md:mt-4 mb-0.5 w-full">
-              <SocialRow socials={user.socials} theme={effectiveTheme} />
+              <SocialRow
+                socials={user.socials}
+                theme={effectiveTheme}
+                align={user.socialsAlign || "center"}
+              />
             </div>
           )}
         </article>
 
         {/* Content wrapper with horizontal padding */}
         <div className="px-4 min-w-0 w-full">
-
-        {!showLinksContent && hasMultiPageNav && (
-          <div className="mt-1 mb-3 flex justify-center">
-            <SitePagesOverflowMenu {...siteNavProps} />
-          </div>
-        )}
 
         {!showLinksContent && pageType === "blog" && (
           <PageBlogView
@@ -680,8 +692,6 @@ const UniversalTheme = ({
 
         {/* --- G. FOOTER CTA --- */}
         <div className="mt-auto flex flex-col items-center justify-center pb-6">
-          {hasMultiPageNav && <SitePagesFooterLinks {...siteNavProps} />}
-
           {!hideBranding && (
             <button
               className="group relative mb-4 inline-flex items-center justify-center gap-2"
