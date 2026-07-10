@@ -489,10 +489,10 @@ const UniversalTheme = ({
 
           {user?.bio && (
             <p 
-              className={`mt-1.5 md:mt-3 text-sm md:text-base opacity-90 break-words max-w-sm mx-auto md:mx-0 whitespace-pre-wrap leading-snug md:leading-relaxed font-medium line-clamp-3 md:line-clamp-none
+              className={`mt-1.5 md:mt-3 text-sm md:text-base opacity-90 break-words max-w-sm whitespace-pre-wrap leading-snug md:leading-relaxed font-medium line-clamp-3 md:line-clamp-none
                 ${
                   user?.banner?.enabled && user?.banner?.image && user.banner.style === "discord"
-                    ? "text-left mx-0"
+                    ? "text-left self-start"
                     : "text-center mx-auto"
                 }
               `}
