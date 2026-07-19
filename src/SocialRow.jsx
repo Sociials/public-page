@@ -17,6 +17,10 @@ import {
   getCustomButtonStyle,
 } from "./buttonInteraction.js";
 import { navigateExternalLink } from "./openExternalBrowser.js";
+import {
+  SOCIAL_ROW_ROOT_CLASS,
+  resolveSocialRowJustifyClass,
+} from "./socialRowLayout.js";
 
 const iconMap = {
   youtube: { icon: FaYoutube, prefix: "https://youtube.com/" },
@@ -90,15 +94,10 @@ const SocialRow = React.memo(function SocialRow({ socials, theme, align = "cente
       })
     : {};
 
-  const justifyClass =
-    align === "left"
-      ? "justify-start"
-      : align === "right"
-        ? "justify-end"
-        : "justify-center";
+  const justifyClass = resolveSocialRowJustifyClass(align);
 
   return (
-    <div className={`flex flex-wrap ${justifyClass} gap-2 md:gap-3 mt-0`}>
+    <div className={`${SOCIAL_ROW_ROOT_CLASS} ${justifyClass}`}>
       {Object.entries(socials || {}).map(([platform, handle]) => {
         if (!handle) return null;
 

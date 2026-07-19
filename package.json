@@ -1,6 +1,6 @@
 {
   "name": "@sociials/public-page",
-  "version": "0.1.6",
+  "version": "0.2.5",
   "private": true,
   "type": "module",
   "main": "./src/index.js",
