@@ -17,6 +17,7 @@ import {
   FaCalendarCheck,
 } from "react-icons/fa6";
 import { getLinkAnchorProps, resolveLinkHref } from "./linkHref.js";
+import { navigateExternalLink } from "./openExternalBrowser.js";
 import {
   CUSTOM_BTN_INTERACT_CLASS,
   STATIC_BTN_INTERACT_CLASS,
@@ -78,6 +79,11 @@ const LinkCard = React.memo(function LinkCard({ link, theme, onClick, layout = "
   // Safe URL + anchor attributes (tel: / wa.me supported)
   const anchorProps = getLinkAnchorProps(link);
   const safeUrl = anchorProps.href;
+
+  const handleAnchorClick = (e) => {
+    onClick?.(e);
+    navigateExternalLink(e, safeUrl);
+  };
 
   // --- SHARE HANDLER ---
   const handleShare = (e) => {
@@ -163,12 +169,6 @@ const LinkCard = React.memo(function LinkCard({ link, theme, onClick, layout = "
               : btnConfig.shape === "rounded"
                 ? "12px"
                 : "0px",
-          shadow:
-            btnConfig.style === "hard-shadow"
-              ? `4px 4px 0px ${btnConfig.shadowColor}`
-              : btnConfig.style === "soft-shadow"
-                ? `0 4px 15px ${btnConfig.shadowColor}40`
-                : "none",
         }),
         fontFamily: theme.fontFamily,
       }
@@ -227,7 +227,7 @@ const LinkCard = React.memo(function LinkCard({ link, theme, onClick, layout = "
         href={safeUrl}
         target={anchorProps.target}
         rel={anchorProps.rel}
-        onClick={onClick}
+        onClick={handleAnchorClick}
         style={carouselStyle}
         className={`
           relative block w-full h-[168px] sm:h-[180px] overflow-hidden group
@@ -290,7 +290,7 @@ const LinkCard = React.memo(function LinkCard({ link, theme, onClick, layout = "
           href={safeUrl}
           target={anchorProps.target}
           rel={anchorProps.rel}
-          onClick={onClick}
+          onClick={handleAnchorClick}
           style={isCustom ? customStyle : staticMediaBorderStyle}
           className={`
             relative block w-full ${marginClass} !p-0 overflow-hidden group 
@@ -343,7 +343,7 @@ const LinkCard = React.memo(function LinkCard({ link, theme, onClick, layout = "
           href={safeUrl}
           target={anchorProps.target}
           rel={anchorProps.rel}
-          onClick={onClick}
+          onClick={handleAnchorClick}
           style={isCustom ? customStyle : staticMediaBorderStyle}
           className={`
             block w-full ${marginClass} !p-0 overflow-hidden group 
@@ -402,7 +402,7 @@ const LinkCard = React.memo(function LinkCard({ link, theme, onClick, layout = "
           href={safeUrl}
           target={anchorProps.target}
           rel={anchorProps.rel}
-          onClick={onClick}
+          onClick={handleAnchorClick}
           style={isCustom ? customStyle : staticMediaBorderStyle}
           className={`
             flex items-center w-full ${marginClass} !p-3 overflow-hidden group gap-4
@@ -475,7 +475,7 @@ const LinkCard = React.memo(function LinkCard({ link, theme, onClick, layout = "
         href={safeUrl}
         target={anchorProps.target}
         rel={anchorProps.rel}
-        onClick={onClick}
+        onClick={handleAnchorClick}
         style={isCustom ? customStyle : staticRichRowStyle}
         className={`
           flex items-center w-full ${marginClass} !p-0 overflow-hidden group

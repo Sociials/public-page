@@ -16,6 +16,7 @@ import {
   ensureButtonInteractStyles,
   getCustomButtonStyle,
 } from "./buttonInteraction.js";
+import { navigateExternalLink } from "./openExternalBrowser.js";
 
 const iconMap = {
   youtube: { icon: FaYoutube, prefix: "https://youtube.com/" },
@@ -114,6 +115,7 @@ const SocialRow = React.memo(function SocialRow({ socials, theme, align = "cente
             href={url}
             target="_blank"
             rel="noopener noreferrer"
+            onClick={(e) => navigateExternalLink(e, url)}
             style={customStyle}
             className={`
               ${buttonClass}

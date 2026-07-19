@@ -8,6 +8,7 @@ const PageBlogView = ({
   themeFontFamily,
   isCustom,
   customButton,
+  profileTextColors,
 }) => {
   const subtitle = user?.pageContent?.subtitle || "";
   const body = user?.pageContent?.body || "";
@@ -16,9 +17,11 @@ const PageBlogView = ({
   const layout = getBlogLayoutClasses(style);
 
   const textStyle =
-    isCustom && customButton?.textColor
-      ? { color: customButton.textColor, fontFamily: themeFontFamily?.fontFamily }
-      : themeFontFamily;
+    isCustom && profileTextColors?.usernameColor
+      ? { color: profileTextColors.usernameColor, fontFamily: themeFontFamily?.fontFamily }
+      : isCustom && customButton?.textColor
+        ? { color: customButton.textColor, fontFamily: themeFontFamily?.fontFamily }
+        : themeFontFamily;
 
   return (
     <article className={layout.wrapper} style={textStyle}>

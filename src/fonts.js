@@ -14,7 +14,20 @@ export const CUSTOM_FONT_STACKS = {
   Merriweather: '"Merriweather", ui-serif, Georgia, serif',
   Nunito: '"Nunito", ui-sans-serif, system-ui, sans-serif',
   Ubuntu: '"Ubuntu", ui-sans-serif, system-ui, sans-serif',
+  "DM Sans": '"DM Sans", ui-sans-serif, system-ui, sans-serif',
+  "Open Sans": '"Open Sans", ui-sans-serif, system-ui, sans-serif',
+  "Work Sans": '"Work Sans", ui-sans-serif, system-ui, sans-serif',
+  Outfit: '"Outfit", ui-sans-serif, system-ui, sans-serif',
+  Manrope: '"Manrope", ui-sans-serif, system-ui, sans-serif',
+  "Space Grotesk": '"Space Grotesk", ui-sans-serif, system-ui, sans-serif',
+  Quicksand: '"Quicksand", ui-sans-serif, system-ui, sans-serif',
+  "Bebas Neue": '"Bebas Neue", ui-sans-serif, system-ui, sans-serif',
+  "Josefin Sans": '"Josefin Sans", ui-sans-serif, system-ui, sans-serif',
+  Lora: '"Lora", ui-serif, Georgia, serif',
+  "Crimson Pro": '"Crimson Pro", ui-serif, Georgia, serif',
 };
+
+export const FONT_OPTIONS = Object.keys(CUSTOM_FONT_STACKS);
 
 export const DEFAULT_FONT_STACK = CUSTOM_FONT_STACKS.Inter;
 
@@ -47,6 +60,17 @@ const GOOGLE_FONT_SPECS = {
   Merriweather: "Merriweather:wght@300;400;700;900",
   Nunito: "Nunito:wght@200..1000",
   Ubuntu: "Ubuntu:wght@300;400;500;700",
+  "DM Sans": "DM+Sans:opsz,wght@9..40,100..1000",
+  "Open Sans": "Open+Sans:wght@300..800",
+  "Work Sans": "Work+Sans:wght@100..900",
+  Outfit: "Outfit:wght@100..900",
+  Manrope: "Manrope:wght@200..800",
+  "Space Grotesk": "Space+Grotesk:wght@300..700",
+  Quicksand: "Quicksand:wght@300..700",
+  "Bebas Neue": "Bebas+Neue",
+  "Josefin Sans": "Josefin+Sans:wght@100..700",
+  Lora: "Lora:wght@400..700",
+  "Crimson Pro": "Crimson+Pro:wght@200..900",
 };
 
 export function resolveThemeFontName(user) {

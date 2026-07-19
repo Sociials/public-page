@@ -17,7 +17,27 @@ export { isAgeVerified, setAgeVerified, getAgeGateStorageKey } from "./ageGate.j
 export { default as UniversalTheme } from "./UniversalTheme.jsx";
 export { staticThemes } from "./staticThemes.js";
 export {
+  COLOR_PALETTES,
+  GRADIENT_PRESETS,
+  CUSTOM_BUTTON_STYLES,
+  normalizeHex,
+  getContrastRatio,
+  getContrastWarnings,
+  resolveProfileTextColors,
+  resolveCustomPageBackgroundStyle,
+  resolveBackgroundSampleColor,
+  parseLinearGradient,
+  buildLinearGradient,
+} from "./customTheme.js";
+export {
+  getCustomButtonColors,
+  getCustomButtonStyle,
+  CUSTOM_BTN_INTERACT_CLASS,
+  STATIC_BTN_INTERACT_CLASS,
+} from "./buttonInteraction.js";
+export {
   CUSTOM_FONT_STACKS,
+  FONT_OPTIONS,
   resolveCustomFontStack,
   resolveStaticFontStack,
   resolveThemeFontName,
@@ -27,6 +47,8 @@ export {
 export { default as ThemeFontLoader } from "./ThemeFontLoader.jsx";
 export { detectLinkType, getYoutubeId } from "./linkDetector.js";
 export { default as SocialRow } from "./SocialRow.jsx";
+export { default as AffiliateDisclosure, DISCLOSURE_PRESETS, resolveDisclosureText } from "./AffiliateDisclosure.jsx";
+export { isInAppBrowser, navigateExternalLink } from "./openExternalBrowser.js";
 export { default as LinkCard } from "./LinkCard.jsx";
 export { default as MediaEmbed } from "./MediaEmbed.jsx";
 export { default as ShopGrid } from "./ShopGrid.jsx";

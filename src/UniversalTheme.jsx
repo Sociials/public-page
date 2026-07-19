@@ -8,8 +8,11 @@ import {
 import { resolveCustomFontStack, resolveStaticFontStack } from "./fonts.js";
 import ThemeFontLoader from "./ThemeFontLoader.jsx";
 import ProfileScrollContainer from "./ProfileScrollContainer.jsx";
+import { resolveProfileTextColors, resolveCustomPageBackgroundStyle } from "./customTheme.js";
 import { staticThemes } from "./staticThemes.js";
 import SocialRow from "./SocialRow.jsx";
+import AffiliateDisclosure from "./AffiliateDisclosure.jsx";
+import { isInAppBrowser } from "./openExternalBrowser.js";
 import LinkCard from "./LinkCard.jsx";
 import LinkGroupCarousel from "./LinkGroupCarousel.jsx";
 import LinkGroupProjects from "./LinkGroupProjects.jsx";
@@ -70,6 +73,13 @@ const UniversalTheme = ({
   // Never read sessionStorage in useState initializer — SSR and client must match on first paint.
   const [ageGateHydrated, setAgeGateHydrated] = useState(false);
   const [ageVerified, setAgeVerified] = useState(false);
+  const [showBrowserHint, setShowBrowserHint] = useState(false);
+
+  useEffect(() => {
+    if (!skipAgeGate && isInAppBrowser()) {
+      setShowBrowserHint(true);
+    }
+  }, [skipAgeGate]);
 
   useEffect(() => {
     ensureButtonInteractStyles();
@@ -136,6 +146,7 @@ const UniversalTheme = ({
 
   const staticTheme =
     staticThemes.find((t) => t.title === user?.theme) || staticThemes[0];
+  const profileTextColors = isCustom ? resolveProfileTextColors(customConfig) : null;
 
   const pageFontStack = isCustom
     ? resolveCustomFontStack(customConfig.fontFamily)
@@ -147,8 +158,7 @@ const UniversalTheme = ({
 
   const customContainerStyle = isCustom
     ? {
-        // Page shell carries the background; keep text color for inheritance
-        color: customButton.textColor || "#000000",
+        color: profileTextColors?.usernameColor || "#000000",
       }
     : {};
 
@@ -162,18 +172,15 @@ const UniversalTheme = ({
     if (customBackground.type === "image" && customBackground.image) {
       return {
         ...base,
-        backgroundColor: "#0a0a0a",
-        backgroundImage: `url(${customBackground.image})`,
-        backgroundSize: "cover",
-        backgroundPosition: "center",
+        ...resolveCustomPageBackgroundStyle(customBackground),
       };
     }
     if (customBackground.type === "gradient" && customBackground.value) {
-      return { ...base, background: customBackground.value };
+      return { ...base, ...resolveCustomPageBackgroundStyle(customBackground) };
     }
     return {
       ...base,
-      backgroundColor: customBackground.value || "#F3F2EC",
+      ...resolveCustomPageBackgroundStyle(customBackground),
     };
   })();
 
@@ -282,7 +289,7 @@ const UniversalTheme = ({
       className={`block w-full mb-2 mt-1 py-1 px-1 text-center font-bold text-base ${!isCustom ? textClass : ""}`}
       style={
         isCustom
-          ? { color: customButton.textColor, fontFamily: pageFontStack }
+          ? { color: profileTextColors?.usernameColor, fontFamily: pageFontStack }
           : {}
       }
     >
@@ -403,6 +410,22 @@ const UniversalTheme = ({
       >
           <div className="relative z-10 w-full flex flex-col min-h-full">
 
+        {showBrowserHint && (
+          <div className="mx-4 mt-2 flex items-start justify-between gap-2 rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 text-[11px] leading-snug text-gray-600">
+            <span>
+              Links open best in <strong>Safari</strong> or <strong>Chrome</strong> — use ⋯ → Open in browser if checkout fails.
+            </span>
+            <button
+              type="button"
+              onClick={() => setShowBrowserHint(false)}
+              className="shrink-0 text-gray-400 hover:text-gray-700"
+              aria-label="Dismiss"
+            >
+              ×
+            </button>
+          </div>
+        )}
+
         {/* Full-bleed banner (centered / discord) */}
         {isFullBleedBanner && (
           <div className="w-full shrink-0 relative z-0 md:mt-3">
@@ -472,7 +495,10 @@ const UniversalTheme = ({
           </div>
 
           <h1
-            style={themeFontFamily}
+            style={{
+              ...themeFontFamily,
+              ...(isCustom ? { color: profileTextColors?.usernameColor } : {}),
+            }}
             className={`mt-2 md:mt-4 leading-tight break-all text-base font-bold md:text-2xl ${textClass}`}
           >
             @{user?.username || "username"}
@@ -480,7 +506,10 @@ const UniversalTheme = ({
 
           {isSubPage && user?.title && pageType !== "blog" && pageType !== "gallery" && (
             <h2
-              style={themeFontFamily}
+              style={{
+                ...themeFontFamily,
+                ...(isCustom ? { color: profileTextColors?.usernameColor } : {}),
+              }}
               className={`mt-1 md:mt-2 text-base md:text-xl font-black break-words max-w-sm ${textClass}`}
             >
               {user.title}
@@ -489,14 +518,18 @@ const UniversalTheme = ({
 
           {user?.bio && (
             <p 
-              className={`mt-1.5 md:mt-3 text-sm md:text-base opacity-90 break-words max-w-sm whitespace-pre-wrap leading-snug md:leading-relaxed font-medium line-clamp-3 md:line-clamp-none
+              className={`mt-1.5 md:mt-3 text-sm md:text-base break-words max-w-sm whitespace-pre-wrap leading-snug md:leading-relaxed font-medium line-clamp-3 md:line-clamp-none
                 ${
                   user?.banner?.enabled && user?.banner?.image && user.banner.style === "discord"
                     ? "text-left self-start"
                     : "text-center mx-auto"
                 }
+                ${!isCustom ? "opacity-90" : ""}
               `}
-              style={themeFontFamily}
+              style={{
+                ...themeFontFamily,
+                ...(isCustom ? { color: profileTextColors?.bioColor } : {}),
+              }}
             >
               {user.bio}
             </p>
@@ -524,6 +557,7 @@ const UniversalTheme = ({
             themeFontFamily={themeFontFamily}
             isCustom={isCustom}
             customButton={customButton}
+            profileTextColors={profileTextColors}
           />
         )}
 
@@ -535,6 +569,7 @@ const UniversalTheme = ({
             themeFontFamily={themeFontFamily}
             isCustom={isCustom}
             customButton={customButton}
+            profileTextColors={profileTextColors}
           />
         )}
 
@@ -584,7 +619,7 @@ const UniversalTheme = ({
                       className={`text-[10px] font-black uppercase tracking-[0.2em] mb-2 text-center opacity-60 ${!isCustom ? textClass : ""}`}
                       style={
                         isCustom
-                          ? { color: customButton.textColor, fontFamily: pageFontStack }
+                          ? { color: profileTextColors?.usernameColor, fontFamily: pageFontStack }
                           : {}
                       }
                     >
@@ -692,6 +727,19 @@ const UniversalTheme = ({
 
         {/* --- G. FOOTER CTA --- */}
         <div className="mt-auto flex flex-col items-center justify-center pb-6">
+          <AffiliateDisclosure
+            disclosure={user?.affiliateDisclosure}
+            className="mb-4 max-w-sm"
+            style={
+              isCustom
+                ? {
+                    color: profileTextColors?.bioColor,
+                    opacity: 0.75,
+                    fontFamily: pageFontStack,
+                  }
+                : undefined
+            }
+          />
           {!hideBranding && (
             <button
               className="group relative mb-4 inline-flex items-center justify-center gap-2"
