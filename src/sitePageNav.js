@@ -1,4 +1,4 @@
-import { FaImages, FaLink, FaPen } from "react-icons/fa6";
+import { FaImages, FaLink, FaPen } from "react-icons/fa";
 
 export const resolvePageHref = (page, username) => {
   const path = page?.publicPath;
