@@ -26,6 +26,7 @@ import YouTubeFeed from "./YouTubeFeed.jsx";
 import NewsletterForm from "./NewsletterForm.jsx";
 import GitHubStats from "./GitHubStats.jsx";
 import { buildLinkBlocks } from "./linkBlocks.js";
+import { shouldRenderSmartEmbed } from "./linkDetector.js";
 import PageBlogView from "./PageBlogView.jsx";
 import PageGalleryView from "./PageGalleryView.jsx";
 import {
@@ -255,23 +256,12 @@ const UniversalTheme = ({
   const linkBlocks = buildLinkBlocks(sortedLinks);
 
   const renderStandardLink = (link) => {
-    if (user.smartEmbeds) {
-      if (
-        [
-          "youtube",
-          "spotify",
-          "twitch",
-          "applemusic",
-          "soundcloud",
-          "vimeo",
-        ].includes(link.type)
-      ) {
-        return (
-          <div key={link._id} onClick={() => handleLinkClick(link)}>
-            <MediaEmbed link={link} theme={effectiveTheme} />
-          </div>
-        );
-      }
+    if (shouldRenderSmartEmbed(link, user.smartEmbeds)) {
+      return (
+        <div key={link._id} onClick={() => handleLinkClick(link)}>
+          <MediaEmbed link={link} theme={effectiveTheme} />
+        </div>
+      );
     }
 
     return (

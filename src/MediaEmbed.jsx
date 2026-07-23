@@ -13,18 +13,14 @@ import {
   FaLink,
   FaArrowUpRightFromSquare,
 } from "react-icons/fa6";
+import { getYoutubeId } from "./linkDetector.js";
 
-// ... (Helper functions remain the same) ...
 const getId = (url, type) => {
   if (!url) return null;
 
   switch (type) {
-    case "youtube": {
-      const match = url.match(
-        /(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=))([\w-]{11})/,
-      );
-      return match ? match[1] : null;
-    }
+    case "youtube":
+      return getYoutubeId(url);
     case "spotify": {
       const match = url.match(
         /open\.spotify\.com\/(track|album|playlist|episode)\/([a-zA-Z0-9]+)/,

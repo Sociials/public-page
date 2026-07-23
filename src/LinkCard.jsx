@@ -25,17 +25,7 @@ import {
   getCustomButtonColors,
   getCustomButtonStyle,
 } from "./buttonInteraction.js";
-
-// 1. Helper to get YouTube Thumbnail URL
-const getYouTubeThumbnail = (url) => {
-  if (!url) return null;
-  const regExp =
-    /^.*((youtu.be\/)|(v\/)|(\/u\/\w\/)|(embed\/)|(watch\?))\??v?=?([^#&?]*).*/;
-  const match = url.match(regExp);
-  return match && match[7].length === 11
-    ? `https://img.youtube.com/vi/${match[7]}/hqdefault.jpg`
-    : null;
-};
+import { getYoutubeThumbnailUrl } from "./linkDetector.js";
 
 // 2. Icon Mapper
 const getPlatformIcon = (type) => {
@@ -66,6 +56,19 @@ const getPlatformIcon = (type) => {
       return <FaSoundcloud className="text-[#FF5500]" />;
     default:
       return <FaLink className="text-gray-600" />;
+  }
+};
+
+const getPlatformFallbackSubtitle = (type) => {
+  switch (type) {
+    case "booking":
+      return "Book a call";
+    case "whatsapp":
+      return "Chat on WhatsApp";
+    case "phone":
+      return "Call";
+    default:
+      return "";
   }
 };
 
@@ -113,7 +116,7 @@ const LinkCard = React.memo(function LinkCard({ link, theme, onClick, layout = "
 
   // Priority 2: Auto-detect YouTube thumbnail if no custom cover exists
   if (!displayImage && link.type === "youtube") {
-    displayImage = getYouTubeThumbnail(resolveLinkHref(link?.url));
+    displayImage = getYoutubeThumbnailUrl(resolveLinkHref(link?.url));
   }
 
   // --- HELPER: RENDER ICON (Custom Image OR Default SVG) ---
@@ -173,6 +176,12 @@ const LinkCard = React.memo(function LinkCard({ link, theme, onClick, layout = "
         fontFamily: theme.fontFamily,
       }
     : {};
+
+  const linkSubtitle =
+    (link.description || "").trim() || getPlatformFallbackSubtitle(link.type);
+
+  const renderLinkSubtitle = (className) =>
+    linkSubtitle ? <p className={className}>{linkSubtitle}</p> : null;
 
   // --- SHARE BUTTON COMPONENT (Reusable) ---
   const ShareButton = ({ className, iconClassName }) => (
@@ -266,9 +275,9 @@ const LinkCard = React.memo(function LinkCard({ link, theme, onClick, layout = "
             >
               {link.title}
             </span>
-            {link.description ? (
+            {linkSubtitle ? (
               <p className="text-[10px] text-white/75 line-clamp-1 mt-0.5">
-                {link.description}
+                {linkSubtitle}
               </p>
             ) : null}
           </div>
@@ -323,6 +332,9 @@ const LinkCard = React.memo(function LinkCard({ link, theme, onClick, layout = "
               >
                 {link.title}
               </span>
+              {renderLinkSubtitle(
+                "text-xs text-white/80 line-clamp-1 leading-relaxed font-medium mt-1 drop-shadow-sm",
+              )}
             </div>
 
             <div
@@ -385,11 +397,11 @@ const LinkCard = React.memo(function LinkCard({ link, theme, onClick, layout = "
             <span className="font-bold text-base leading-tight line-clamp-1">
               {link.title}
             </span>
-            {link.description && (
-              <p className="text-xs opacity-70 line-clamp-1 leading-relaxed font-medium mt-1">
-                {link.description}
-              </p>
-            )}
+            {linkSubtitle ? (
+              renderLinkSubtitle(
+                "text-xs opacity-70 line-clamp-1 leading-relaxed font-medium mt-1",
+              )
+            ) : null}
           </div>
         </a>
       );
@@ -428,12 +440,10 @@ const LinkCard = React.memo(function LinkCard({ link, theme, onClick, layout = "
             <h3 className="font-bold text-base leading-tight truncate">
               {link.title}
             </h3>
-            {link.description && (
-              <p className="text-xs opacity-70 line-clamp-1 leading-relaxed mt-0.5">
-                {link.description}
-              </p>
+            {renderLinkSubtitle(
+              "text-xs opacity-70 line-clamp-1 leading-relaxed mt-0.5",
             )}
-            {!link.description && (
+            {!linkSubtitle && (
               <p className="text-[10px] opacity-50 uppercase font-bold tracking-wider mt-1">{link.type}</p>
             )}
           </div>
@@ -456,12 +466,15 @@ const LinkCard = React.memo(function LinkCard({ link, theme, onClick, layout = "
   // RENDER OPTION B: RICH ROW (Icon Left | Text Middle)
   // ---------------------------------------------------------
   const isRichPlatform = [
+    "youtube",
     "instagram",
     "tiktok",
     "spotify",
     "twitter",
     "github",
     "linkedin",
+    "twitch",
+    "soundcloud",
     "whatsapp",
     "phone",
     "booking",
@@ -495,11 +508,11 @@ const LinkCard = React.memo(function LinkCard({ link, theme, onClick, layout = "
         </div>
 
         {/* Middle Text */}
-        <div className="flex-1 px-4 text-left overflow-hidden">
+        <div className="flex-1 px-4 text-left overflow-hidden min-w-0">
           <p className="font-bold text-sm truncate">{link.title}</p>
-          <p className="text-[10px] uppercase tracking-widest font-bold opacity-60">
-            {link.type === "booking" ? "book a call" : link.type}
-          </p>
+          {renderLinkSubtitle(
+            "text-xs opacity-70 line-clamp-1 leading-relaxed font-medium mt-0.5",
+          )}
         </div>
 
         {/* Right Actions */}
@@ -533,7 +546,14 @@ const LinkCard = React.memo(function LinkCard({ link, theme, onClick, layout = "
       </div>
 
       {/* Title: Centered */}
-      <span className="w-full truncate px-8">{link.title}</span>
+      <div className="w-full truncate px-8 flex flex-col items-center min-w-0">
+        <span className="w-full truncate">{link.title}</span>
+        {linkSubtitle && linkSubtitle !== link.title ? (
+          <span className="w-full truncate text-xs font-medium opacity-70 mt-0.5">
+            {linkSubtitle}
+          </span>
+        ) : null}
+      </div>
 
       {/* Share: Pinned Absolute Right (Show on hover/group-focus on desktop, or always visible) */}
       <div className="absolute right-4 top-1/2 -translate-y-1/2">

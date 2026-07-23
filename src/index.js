@@ -45,7 +45,14 @@ export {
   getThemeGoogleFontsUrl,
 } from "./fonts.js";
 export { default as ThemeFontLoader } from "./ThemeFontLoader.jsx";
-export { detectLinkType, getYoutubeId } from "./linkDetector.js";
+export {
+  detectLinkType,
+  getYoutubeId,
+  getYoutubeThumbnailUrl,
+  canSmartEmbedLink,
+  shouldRenderSmartEmbed,
+  SMART_EMBED_LINK_TYPES,
+} from "./linkDetector.js";
 export { default as SocialRow } from "./SocialRow.jsx";
 export { default as AffiliateDisclosure, DISCLOSURE_PRESETS, resolveDisclosureText } from "./AffiliateDisclosure.jsx";
 export { isInAppBrowser, navigateExternalLink } from "./openExternalBrowser.js";
