@@ -453,20 +453,23 @@ const UniversalTheme = ({
           </div>
         )}
 
-        {/* Top nav when no banner */}
-        {!hasBanner && renderTopChrome("pt-5 pb-2 mb-1 md:pt-8 md:pb-4 md:mb-2")}
+        {/* Top nav when no banner (Hero overlays it on the full-bleed image) */}
+        {!hasBanner && !isHeroProfile &&
+          renderTopChrome("pt-5 pb-2 mb-1 md:pt-8 md:pb-4 md:mb-2")}
 
         {/* --- PROFILE SECTION (overlaps banner for centered/discord) --- */}
         <article 
-          className={`flex flex-col relative z-10 w-full min-w-0 px-4
+          className={`flex flex-col relative z-10 w-full min-w-0
             ${
               user?.banner?.enabled && user?.banner?.image
                 ? user.banner.style === "discord"
                   ? `${BANNER_PROFILE_OVERLAP_CLASS} px-5 md:px-6 items-start text-left`
                   : user.banner.style === "centered"
-                    ? `${BANNER_PROFILE_OVERLAP_CLASS} items-center text-center`
-                    : `${BANNER_PROFILE_OVERLAP_CLASS} items-center text-center`
-                : "items-center text-center pt-1 md:pt-0"
+                    ? `${BANNER_PROFILE_OVERLAP_CLASS} px-4 items-center text-center`
+                    : `${BANNER_PROFILE_OVERLAP_CLASS} px-4 items-center text-center`
+                : isHeroProfile || isCutoutProfile
+                  ? "items-center text-center"
+                  : "items-center text-center px-4 pt-1 md:pt-0"
             }
             ${textClass}
           `}
@@ -474,9 +477,9 @@ const UniversalTheme = ({
           <div
             className={`shrink-0 relative z-10 ${
               isHeroProfile
-                ? "h-56 w-full max-w-sm md:h-72"
+                ? "flex h-[38vh] min-h-64 max-h-[22rem] w-full items-center justify-center overflow-hidden"
                 : isCutoutProfile
-                  ? "h-44 w-44 md:h-56 md:w-56"
+                  ? "w-full min-w-0 max-w-full overflow-hidden px-4 sm:px-6"
                   : isShapeProfile
                     ? getProfileShapeFrameClass(profileHeaderShape)
                     : ""
@@ -488,9 +491,9 @@ const UniversalTheme = ({
                 alt={`${user?.username || "User"}'s profile picture on Sociials`}
                 className={`${
                   isHeroProfile
-                    ? "h-full w-full rounded-[28px] object-cover object-center"
+                    ? "h-full w-full object-cover object-center"
                     : isCutoutProfile
-                      ? "h-full w-full object-contain object-bottom drop-shadow-xl"
+                      ? "mx-auto block h-auto w-[clamp(12rem,72vw,24rem)] max-w-[82%] object-contain object-bottom"
                       : isShapeProfile
                         ? "h-full w-full object-cover shadow-lg"
                         : "w-20 h-20 md:w-[125px] md:h-[125px] rounded-full object-cover shadow-lg md:shadow-xl"
@@ -504,20 +507,27 @@ const UniversalTheme = ({
                 style={
                   isHeroProfile
                     ? {
-                        WebkitMaskImage: "linear-gradient(to bottom, black 68%, transparent 100%)",
-                        maskImage: "linear-gradient(to bottom, black 68%, transparent 100%)",
+                        WebkitMaskImage:
+                          "linear-gradient(to bottom, #000 0%, #000 66%, rgba(0,0,0,0.85) 76%, transparent 100%)",
+                        maskImage:
+                          "linear-gradient(to bottom, #000 0%, #000 66%, rgba(0,0,0,0.85) 76%, transparent 100%)",
                       }
                     : isShapeProfile
                       ? getProfileShapeStyle(profileHeaderShape)
                       : undefined
                 }
-                width={125}
-                height={125}
+                {...(!isHeroProfile && !isCutoutProfile
+                  ? { width: 125, height: 125 }
+                  : {})}
                 loading="eager"
               />
             ) : (
               <FaUserCircle className="w-20 h-20 md:w-[125px] md:h-[125px] text-gray-400" aria-label="Default profile icon" />
             )}
+            {isHeroProfile &&
+              renderTopChrome("absolute top-0 left-0 right-0 z-20 pt-5 pb-3 md:pt-8", {
+                overlay: true,
+              })}
           </div>
 
           <h1
@@ -525,7 +535,11 @@ const UniversalTheme = ({
               ...themeFontFamily,
               ...(isCustom ? { color: profileTextColors?.usernameColor } : {}),
             }}
-            className={`mt-2 md:mt-4 leading-tight break-all text-base font-bold md:text-2xl ${textClass}`}
+            className={`${
+              isHeroProfile
+                ? "relative z-20 -mt-7 px-6 !text-2xl md:-mt-9 md:!text-3xl"
+                : "mt-2 px-4 md:mt-4"
+            } leading-tight break-all text-base font-bold md:text-2xl ${textClass}`}
           >
             @{user?.username || "username"}
           </h1>
@@ -536,7 +550,7 @@ const UniversalTheme = ({
                 ...themeFontFamily,
                 ...(isCustom ? { color: profileTextColors?.usernameColor } : {}),
               }}
-              className={`mt-1 md:mt-2 text-base md:text-xl font-black break-words max-w-sm ${textClass}`}
+              className={`relative z-20 mt-1 px-4 md:mt-2 text-base md:text-xl font-black break-words max-w-sm ${textClass}`}
             >
               {user.title}
             </h2>
@@ -544,7 +558,7 @@ const UniversalTheme = ({
 
           {user?.bio && (
             <p 
-              className={`mt-1.5 md:mt-3 text-sm md:text-base break-words max-w-sm whitespace-pre-wrap leading-snug md:leading-relaxed font-medium line-clamp-3 md:line-clamp-none
+              className={`relative z-20 mt-1.5 px-4 md:mt-3 text-sm md:text-base break-words max-w-sm whitespace-pre-wrap leading-snug md:leading-relaxed font-medium line-clamp-3 md:line-clamp-none
                 ${
                   user?.banner?.enabled && user?.banner?.image && user.banner.style === "discord"
                     ? "text-left self-start"
@@ -562,7 +576,7 @@ const UniversalTheme = ({
           )}
           {/* --- SOCIAL ICONS (inside article to follow banner alignment) --- */}
           {user?.socials && (
-            <div className="mt-2.5 md:mt-4 mb-0.5 w-full">
+            <div className="mt-2.5 px-4 md:mt-4 mb-0.5 w-full">
               <SocialRow
                 socials={user.socials}
                 theme={effectiveTheme}

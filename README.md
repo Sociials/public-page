@@ -19,9 +19,14 @@ import { UniversalTheme } from "@sociials/public-page";
   onTrackClick={({ pageId, linkId }) => trackClick({ pageId, linkId })}
   apiBaseUrl={API_URL}
   renderReportModal={({ isOpen, onClose, pageId, username }) => (
-    <ReportModal isOpen={isOpen} onClose={onClose} pageId={pageId} username={username} />
+    <ReportModal
+      isOpen={isOpen}
+      onClose={onClose}
+      pageId={pageId}
+      username={username}
+    />
   )}
-/>
+/>;
 ```
 
 No separate deployment — bundled by Vite/Next at app build time.
