@@ -274,7 +274,7 @@ const TitleBadge = ({ title, theme }) => {
       // We use a smaller border radius than buttons for badges usually, or match 'rounded'
       borderRadius:
         btnConfig.shape === "pill"
-          ? "99px"
+          ? "999px"
           : btnConfig.shape === "rounded"
             ? "8px"
             : "0px",

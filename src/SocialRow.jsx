@@ -81,7 +81,7 @@ const SocialRow = React.memo(function SocialRow({ socials, theme, align = "cente
     ? getCustomButtonStyle(btnConfig, {
         radius:
           btnConfig.shape === "pill"
-            ? "50%"
+            ? "999px"
             : btnConfig.shape === "rounded"
               ? "8px"
               : "0px",

@@ -166,9 +166,7 @@ const LinkCard = React.memo(function LinkCard({ link, theme, onClick, layout = "
         ...getCustomButtonStyle(btnConfig, {
           radius:
             btnConfig.shape === "pill"
-              ? displayImage
-                ? "22px"
-                : "999px"
+              ? "999px"
               : btnConfig.shape === "rounded"
                 ? "12px"
                 : "0px",
@@ -176,6 +174,15 @@ const LinkCard = React.memo(function LinkCard({ link, theme, onClick, layout = "
         fontFamily: theme.fontFamily,
       }
     : {};
+
+  // Full pill corners are reserved for compact, row-style links. Large visual
+  // cards need a quieter radius so their image area keeps a useful shape.
+  const visualCardStyle = isCustom
+    ? {
+        ...customStyle,
+        borderRadius: btnConfig.shape === "pill" ? "24px" : customStyle.borderRadius,
+      }
+    : staticMediaBorderStyle;
 
   const linkSubtitle =
     (link.description || "").trim() || getPlatformFallbackSubtitle(link.type);
@@ -227,7 +234,10 @@ const LinkCard = React.memo(function LinkCard({ link, theme, onClick, layout = "
     const carouselStyle = isCustom
       ? {
           ...customStyle,
-          borderRadius: btnConfig.shape === "pill" ? "20px" : "16px",
+          borderRadius:
+            btnConfig.shape === "pill"
+              ? "20px"
+              : "16px",
         }
       : { borderRadius: "16px" };
 
@@ -300,7 +310,7 @@ const LinkCard = React.memo(function LinkCard({ link, theme, onClick, layout = "
           target={anchorProps.target}
           rel={anchorProps.rel}
           onClick={handleAnchorClick}
-          style={isCustom ? customStyle : staticMediaBorderStyle}
+          style={visualCardStyle}
           className={`
             relative block w-full ${marginClass} !p-0 overflow-hidden group 
             aspect-[16/9] sm:aspect-[2/1] 
@@ -356,7 +366,7 @@ const LinkCard = React.memo(function LinkCard({ link, theme, onClick, layout = "
           target={anchorProps.target}
           rel={anchorProps.rel}
           onClick={handleAnchorClick}
-          style={isCustom ? customStyle : staticMediaBorderStyle}
+          style={visualCardStyle}
           className={`
             block w-full ${marginClass} !p-0 overflow-hidden group 
             ${interactClass}
@@ -417,13 +427,20 @@ const LinkCard = React.memo(function LinkCard({ link, theme, onClick, layout = "
           onClick={handleAnchorClick}
           style={isCustom ? customStyle : staticMediaBorderStyle}
           className={`
-            flex items-center w-full ${marginClass} !p-3 overflow-hidden group gap-4
+            flex items-center w-full ${marginClass} overflow-hidden group
+            ${isCustom && btnConfig.shape === "pill" ? "!p-1.5 gap-3" : "!p-3 gap-4"}
             ${interactClass}
             ${buttonClass}
           `}
         >
           {/* Left Thumbnail - Fixed Size, Rounded matches internal container logic or standard */}
-          <div className="w-16 h-16 shrink-0 rounded-lg overflow-hidden bg-gray-100 shadow-sm relative">
+          <div
+            className={`shrink-0 overflow-hidden bg-gray-100 shadow-sm relative ${
+              isCustom && btnConfig.shape === "pill"
+                ? "h-12 w-12 rounded-full"
+                : "h-16 w-16 rounded-lg"
+            }`}
+          >
             <img
               src={displayImage}
               alt={link.title}
@@ -498,8 +515,11 @@ const LinkCard = React.memo(function LinkCard({ link, theme, onClick, layout = "
       >
         {/* Left Icon Block */}
         <div
-          className={`w-14 h-14 flex items-center justify-center text-xl border-r-2 overflow-hidden ${!isCustom ? "bg-gray-50 border-black/5" : ""
-            }`}
+          className={`flex items-center justify-center overflow-hidden text-xl ${
+            isCustom && btnConfig.shape === "pill"
+              ? "m-1 h-12 w-12 shrink-0 rounded-full border-0"
+              : "h-14 w-14 border-r-2"
+          } ${!isCustom ? "bg-gray-50 border-black/5" : ""}`}
           style={
             isCustom ? { borderColor: customColors?.color, opacity: 0.8 } : {}
           }
@@ -534,7 +554,8 @@ const LinkCard = React.memo(function LinkCard({ link, theme, onClick, layout = "
       onClick={onClick}
       style={customStyle}
       className={`
-        relative block w-full ${marginClass} py-4 px-6 text-center font-bold text-lg 
+        relative block w-full ${marginClass} text-center font-bold
+        ${isCustom && btnConfig.shape === "pill" ? "px-5 py-3 text-base leading-tight" : "px-6 py-4 text-lg"}
         ${interactClass}
         flex items-center justify-center group
         ${buttonClass}

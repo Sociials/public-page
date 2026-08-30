@@ -74,7 +74,7 @@ const NewsletterForm = ({ user, activeTheme, apiBaseUrl = "" }) => {
             : "none",
           borderRadius:
             btn.shape === "pill"
-              ? "30px"
+              ? "999px"
               : btn.shape === "rounded"
                 ? "12px"
                 : "0px",

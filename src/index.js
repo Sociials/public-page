@@ -46,6 +46,14 @@ export {
 } from "./fonts.js";
 export { default as ThemeFontLoader } from "./ThemeFontLoader.jsx";
 export {
+  PROFILE_SHAPES,
+  getProfileShapeStyle,
+  getProfileShapeAspect,
+  getProfileShapeFrameClass,
+  getProfileShapeThumbClass,
+  normalizeProfileShape,
+} from "./profileHeader.js";
+export {
   detectLinkType,
   getYoutubeId,
   getYoutubeThumbnailUrl,

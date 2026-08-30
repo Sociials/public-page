@@ -41,6 +41,7 @@ import LockedPageView from "./LockedPageView.jsx";
 import AdultContentGate from "./AdultContentGate.jsx";
 import { isAgeVerified, setAgeVerified as persistAgeVerified } from "./ageGate.js";
 import { ensureButtonInteractStyles } from "./buttonInteraction.js";
+import { getProfileShapeFrameClass, getProfileShapeStyle } from "./profileHeader.js";
 
 /**
  * Public bio page shell. Wire app-specific behavior via props.
@@ -324,6 +325,11 @@ const UniversalTheme = ({
   const hasBanner = user?.banner?.enabled && user?.banner?.image;
   const isFloatingBanner = hasBanner && user.banner.style === "floating";
   const isFullBleedBanner = hasBanner && !isFloatingBanner;
+  const profileHeaderStyle = hasBanner ? "classic" : user?.profileHeaderStyle || "classic";
+  const profileHeaderShape = user?.profileHeaderShape || "pebble";
+  const isHeroProfile = profileHeaderStyle === "hero";
+  const isCutoutProfile = profileHeaderStyle === "cutout";
+  const isShapeProfile = profileHeaderStyle === "shape";
 
   const renderTopChrome = (className = "", { overlay = false } = {}) => (
     <div
@@ -465,16 +471,46 @@ const UniversalTheme = ({
             ${textClass}
           `}
         >
-          <div className="shrink-0 relative z-10">
+          <div
+            className={`shrink-0 relative z-10 ${
+              isHeroProfile
+                ? "h-56 w-full max-w-sm md:h-72"
+                : isCutoutProfile
+                  ? "h-44 w-44 md:h-56 md:w-56"
+                  : isShapeProfile
+                    ? getProfileShapeFrameClass(profileHeaderShape)
+                    : ""
+            }`}
+          >
             {currentProfilePic ? (
               <img
                 src={currentProfilePic}
                 alt={`${user?.username || "User"}'s profile picture on Sociials`}
-                className={`w-20 h-20 md:w-[125px] md:h-[125px] rounded-full object-cover shadow-lg md:shadow-xl ${
+                className={`${
+                  isHeroProfile
+                    ? "h-full w-full rounded-[28px] object-cover object-center"
+                    : isCutoutProfile
+                      ? "h-full w-full object-contain object-bottom drop-shadow-xl"
+                      : isShapeProfile
+                        ? "h-full w-full object-cover shadow-lg"
+                        : "w-20 h-20 md:w-[125px] md:h-[125px] rounded-full object-cover shadow-lg md:shadow-xl"
+                } ${
                   user?.banner?.enabled && user?.banner?.image
                     ? "border-[3px] md:border-[5px] border-white ring-1 ring-black/10"
-                    : "border-[3px] md:border-4 border-white/80"
+                    : isHeroProfile || isCutoutProfile || isShapeProfile
+                      ? ""
+                      : "border-[3px] md:border-4 border-white/80"
                 }`}
+                style={
+                  isHeroProfile
+                    ? {
+                        WebkitMaskImage: "linear-gradient(to bottom, black 68%, transparent 100%)",
+                        maskImage: "linear-gradient(to bottom, black 68%, transparent 100%)",
+                      }
+                    : isShapeProfile
+                      ? getProfileShapeStyle(profileHeaderShape)
+                      : undefined
+                }
                 width={125}
                 height={125}
                 loading="eager"
@@ -786,7 +822,7 @@ const FAQItem = ({ question, answer, activeTheme }) => {
             : "none",
           borderRadius:
             btn.shape === "pill"
-              ? "16px"
+              ? "999px"
               : btn.shape === "rounded"
                 ? "12px"
                 : "0px",
