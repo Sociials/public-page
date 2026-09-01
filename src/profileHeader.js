@@ -99,6 +99,13 @@ export function getProfileShapeFrameClass(shape = "pebble", { preview = false } 
   return "h-44 w-44 md:h-52 md:w-52";
 }
 
+/** Alpha-aware lift so a transparent portrait sits on the page, not in a box. */
+export const PROFILE_CUTOUT_IMAGE_CLASS =
+  "mx-auto block h-auto w-[clamp(12rem,72vw,24rem)] max-w-[82%] object-contain object-bottom";
+
+export const PROFILE_CUTOUT_PREVIEW_IMAGE_CLASS =
+  "mx-auto block h-auto w-[78%] max-w-72 object-contain object-bottom";
+
 export function getProfileShapeThumbClass(shape = "pebble") {
   const aspect = getProfileShapeAspect(shape);
   if (aspect === "extra-wide") return "h-10 w-[4.5rem]";

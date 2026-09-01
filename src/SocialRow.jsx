@@ -15,6 +15,7 @@ import {
   STATIC_BTN_INTERACT_CLASS,
   ensureButtonInteractStyles,
   getCustomButtonStyle,
+  getCustomShapeRadius,
 } from "./buttonInteraction.js";
 import { navigateExternalLink } from "./openExternalBrowser.js";
 import {
@@ -79,12 +80,7 @@ const SocialRow = React.memo(function SocialRow({ socials, theme, align = "cente
 
   const customStyle = isCustom
     ? getCustomButtonStyle(btnConfig, {
-        radius:
-          btnConfig.shape === "pill"
-            ? "999px"
-            : btnConfig.shape === "rounded"
-              ? "8px"
-              : "0px",
+        radius: getCustomShapeRadius(btnConfig.shape, { compact: true }),
         shadow:
           btnConfig.style === "hard-shadow"
             ? `3px 3px 0px ${btnConfig.shadowColor}`

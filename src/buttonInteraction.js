@@ -40,6 +40,17 @@ export const getCustomButtonColors = (btnConfig = {}) => {
   };
 };
 
+/**
+ * Shape "pill" (labeled Soft) is a stadium only on compact chip rows.
+ * Taller cards (covers, newsletter, FAQ) use a soft radius so they don't
+ * look like stretched circles.
+ */
+export const getCustomShapeRadius = (shape, { compact = false } = {}) => {
+  if (shape === "pill") return compact ? "999px" : "20px";
+  if (shape === "rounded") return "12px";
+  return "0px";
+};
+
 export const getCustomButtonStyle = (btnConfig = {}, { radius, shadow } = {}) => {
   const colors = getCustomButtonColors(btnConfig);
   const style = btnConfig.style || "solid";

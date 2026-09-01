@@ -40,8 +40,12 @@ import StoryViewer from "./StoryViewer.jsx";
 import LockedPageView from "./LockedPageView.jsx";
 import AdultContentGate from "./AdultContentGate.jsx";
 import { isAgeVerified, setAgeVerified as persistAgeVerified } from "./ageGate.js";
-import { ensureButtonInteractStyles } from "./buttonInteraction.js";
-import { getProfileShapeFrameClass, getProfileShapeStyle } from "./profileHeader.js";
+import { ensureButtonInteractStyles, getCustomShapeRadius } from "./buttonInteraction.js";
+import {
+  getProfileShapeFrameClass,
+  getProfileShapeStyle,
+  PROFILE_CUTOUT_IMAGE_CLASS,
+} from "./profileHeader.js";
 
 /**
  * Public bio page shell. Wire app-specific behavior via props.
@@ -493,7 +497,7 @@ const UniversalTheme = ({
                   isHeroProfile
                     ? "h-full w-full object-cover object-center"
                     : isCutoutProfile
-                      ? "mx-auto block h-auto w-[clamp(12rem,72vw,24rem)] max-w-[82%] object-contain object-bottom"
+                      ? PROFILE_CUTOUT_IMAGE_CLASS
                       : isShapeProfile
                         ? "h-full w-full object-cover shadow-lg"
                         : "w-20 h-20 md:w-[125px] md:h-[125px] rounded-full object-cover shadow-lg md:shadow-xl"
@@ -834,12 +838,7 @@ const FAQItem = ({ question, answer, activeTheme }) => {
           boxShadow: btn.style?.includes("shadow")
             ? `4px 4px 0px ${btn.shadowColor || "#000000"}`
             : "none",
-          borderRadius:
-            btn.shape === "pill"
-              ? "999px"
-              : btn.shape === "rounded"
-                ? "12px"
-                : "0px",
+          borderRadius: getCustomShapeRadius(btn.shape),
         }
       : {};
 

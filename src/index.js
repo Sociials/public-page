@@ -32,6 +32,7 @@ export {
 export {
   getCustomButtonColors,
   getCustomButtonStyle,
+  getCustomShapeRadius,
   CUSTOM_BTN_INTERACT_CLASS,
   STATIC_BTN_INTERACT_CLASS,
 } from "./buttonInteraction.js";
@@ -47,6 +48,8 @@ export {
 export { default as ThemeFontLoader } from "./ThemeFontLoader.jsx";
 export {
   PROFILE_SHAPES,
+  PROFILE_CUTOUT_IMAGE_CLASS,
+  PROFILE_CUTOUT_PREVIEW_IMAGE_CLASS,
   getProfileShapeStyle,
   getProfileShapeAspect,
   getProfileShapeFrameClass,

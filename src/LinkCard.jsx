@@ -24,6 +24,7 @@ import {
   ensureButtonInteractStyles,
   getCustomButtonColors,
   getCustomButtonStyle,
+  getCustomShapeRadius,
 } from "./buttonInteraction.js";
 import { getYoutubeThumbnailUrl } from "./linkDetector.js";
 
@@ -164,23 +165,17 @@ const LinkCard = React.memo(function LinkCard({ link, theme, onClick, layout = "
   const customStyle = isCustom
     ? {
         ...getCustomButtonStyle(btnConfig, {
-          radius:
-            btnConfig.shape === "pill"
-              ? "999px"
-              : btnConfig.shape === "rounded"
-                ? "12px"
-                : "0px",
+          radius: getCustomShapeRadius(btnConfig.shape, { compact: true }),
         }),
         fontFamily: theme.fontFamily,
       }
     : {};
 
-  // Full pill corners are reserved for compact, row-style links. Large visual
-  // cards need a quieter radius so their image area keeps a useful shape.
+  // Stadium corners only on compact chip rows. Cover / stacked cards use Soft.
   const visualCardStyle = isCustom
     ? {
         ...customStyle,
-        borderRadius: btnConfig.shape === "pill" ? "24px" : customStyle.borderRadius,
+        borderRadius: getCustomShapeRadius(btnConfig.shape),
       }
     : staticMediaBorderStyle;
 
@@ -234,10 +229,7 @@ const LinkCard = React.memo(function LinkCard({ link, theme, onClick, layout = "
     const carouselStyle = isCustom
       ? {
           ...customStyle,
-          borderRadius:
-            btnConfig.shape === "pill"
-              ? "20px"
-              : "16px",
+          borderRadius: getCustomShapeRadius(btnConfig.shape),
         }
       : { borderRadius: "16px" };
 

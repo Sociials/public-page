@@ -14,6 +14,7 @@ import {
   FaArrowUpRightFromSquare,
 } from "react-icons/fa6";
 import { getYoutubeId } from "./linkDetector.js";
+import { getCustomShapeRadius } from "./buttonInteraction.js";
 
 const getId = (url, type) => {
   if (!url) return null;
@@ -272,12 +273,7 @@ const TitleBadge = ({ title, theme }) => {
         : `2px solid ${btnConfig.backgroundColor}`,
       fontFamily: theme.fontFamily,
       // We use a smaller border radius than buttons for badges usually, or match 'rounded'
-      borderRadius:
-        btnConfig.shape === "pill"
-          ? "999px"
-          : btnConfig.shape === "rounded"
-            ? "8px"
-            : "0px",
+      borderRadius: getCustomShapeRadius(btnConfig.shape, { compact: true }),
       boxShadow:
         btnConfig.style === "hard-shadow"
           ? `2px 2px 0px ${btnConfig.shadowColor}`

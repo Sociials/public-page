@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { FaEnvelope, FaCheck, FaTimes } from "react-icons/fa";
+import { getCustomShapeRadius } from "./buttonInteraction.js";
 
 const NewsletterForm = ({ user, activeTheme, apiBaseUrl = "" }) => {
   const [email, setEmail] = useState("");
@@ -72,12 +73,7 @@ const NewsletterForm = ({ user, activeTheme, apiBaseUrl = "" }) => {
           boxShadow: btn.style?.includes("shadow")
             ? `4px 4px 0px ${btn.shadowColor || "#000000"}`
             : "none",
-          borderRadius:
-            btn.shape === "pill"
-              ? "999px"
-              : btn.shape === "rounded"
-                ? "12px"
-                : "0px",
+          borderRadius: getCustomShapeRadius(btn.shape),
         }
       : {};
 
