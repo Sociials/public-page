@@ -29,6 +29,7 @@ const ProjectCard = ({ link, theme, onClick }) => {
             <img
               src={link.thumbnail}
               alt={link.title}
+              referrerPolicy="no-referrer"
               className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.02]"
               loading="lazy"
             />

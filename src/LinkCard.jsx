@@ -129,7 +129,7 @@ const LinkCard = React.memo(function LinkCard({ link, theme, onClick, layout = "
           ? "w-full h-full object-cover" // Full fill for rich row
           : "w-8 h-8 rounded-full object-cover"; // Small bubble for others
 
-      return <img src={link.icon} alt="icon" className={sizing} />;
+      return <img src={link.icon} alt="icon" className={sizing} referrerPolicy="no-referrer" />;
     }
 
     // 2. Default Platform Icon
@@ -250,6 +250,7 @@ const LinkCard = React.memo(function LinkCard({ link, theme, onClick, layout = "
           <img
             src={displayImage}
             alt=""
+            referrerPolicy="no-referrer"
             className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
           />
         ) : (
@@ -314,6 +315,7 @@ const LinkCard = React.memo(function LinkCard({ link, theme, onClick, layout = "
           <img
             src={displayImage}
             alt={link.title}
+            referrerPolicy="no-referrer"
             className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
           />
 
@@ -371,6 +373,7 @@ const LinkCard = React.memo(function LinkCard({ link, theme, onClick, layout = "
             <img
               src={displayImage}
               alt={link.title}
+              referrerPolicy="no-referrer"
               className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
             />
 
@@ -436,6 +439,7 @@ const LinkCard = React.memo(function LinkCard({ link, theme, onClick, layout = "
             <img
               src={displayImage}
               alt={link.title}
+              referrerPolicy="no-referrer"
               className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
             />
             {/* Small Type Icon overlay */}
