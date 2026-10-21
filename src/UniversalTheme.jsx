@@ -1,12 +1,12 @@
 import React, { useState, useEffect, useRef } from "react";
 import {
   FaCheck,
-  FaUserCircle,
   FaChevronDown,
 } from "react-icons/fa";
 
 import { resolveCustomFontStack, resolveStaticFontStack } from "./fonts.js";
 import ThemeFontLoader from "./ThemeFontLoader.jsx";
+import ProfilePlaceholder from "./ProfilePlaceholder.jsx";
 import ProfileScrollContainer from "./ProfileScrollContainer.jsx";
 import { resolveProfileTextColors, resolveCustomPageBackgroundStyle } from "./customTheme.js";
 import { staticThemes } from "./staticThemes.js";
@@ -73,6 +73,7 @@ const UniversalTheme = ({
   sitePagePendingHref = null,
 }) => {
   const [isCopied, setIsCopied] = useState(false);
+  const [failedProfilePic, setFailedProfilePic] = useState(null);
   const [isReportOpen, setIsReportOpen] = useState(false);
   const [activeStoryIndex, setActiveStoryIndex] = useState(null); // Changed to Index
   const [viewMode, setViewMode] = useState("links"); // New state
@@ -325,7 +326,7 @@ const UniversalTheme = ({
     );
   };
 
-  const currentProfilePic = user?.profilePicture;
+  const currentProfilePic = user?.profilePicture !== failedProfilePic ? user?.profilePicture : null;
   const hasBanner = user?.banner?.enabled && user?.banner?.image;
   const isFloatingBanner = hasBanner && user.banner.style === "floating";
   const isFullBleedBanner = hasBanner && !isFloatingBanner;
@@ -492,6 +493,7 @@ const UniversalTheme = ({
             {currentProfilePic ? (
               <img
                 src={currentProfilePic}
+                onError={(event) => setFailedProfilePic(event.currentTarget.getAttribute("src"))}
                 alt={`${user?.username || "User"}'s profile picture on Sociials`}
                 className={`${
                   isHeroProfile
@@ -500,7 +502,9 @@ const UniversalTheme = ({
                       ? PROFILE_CUTOUT_IMAGE_CLASS
                       : isShapeProfile
                         ? "h-full w-full object-cover shadow-lg"
-                        : "w-20 h-20 md:w-[125px] md:h-[125px] rounded-full object-cover shadow-lg md:shadow-xl"
+                        : !isCustom && staticTheme.title === "Studio"
+                          ? "w-20 h-20 md:w-[125px] md:h-[125px] rounded-full object-cover"
+                          : "w-20 h-20 md:w-[125px] md:h-[125px] rounded-full object-cover shadow-lg md:shadow-xl"
                 } ${
                   user?.banner?.enabled && user?.banner?.image
                     ? "border-[3px] md:border-[5px] border-white ring-1 ring-black/10"
@@ -526,7 +530,7 @@ const UniversalTheme = ({
                 loading="eager"
               />
             ) : (
-              <FaUserCircle className="w-20 h-20 md:w-[125px] md:h-[125px] text-gray-400" aria-label="Default profile icon" />
+              <ProfilePlaceholder name={user?.username} className="w-20 h-20 md:w-[125px] md:h-[125px] rounded-full" />
             )}
             {isHeroProfile &&
               renderTopChrome("absolute top-0 left-0 right-0 z-20 pt-5 pb-3 md:pt-8", {

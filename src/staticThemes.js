@@ -489,4 +489,15 @@ export const staticThemes = [
     highlightClass: "bg-[#fef08a] border-2 border-white rounded-[2rem]",
     faqClass: "bg-white/50 border border-white rounded-xl text-[#5b21b6]",
   },
+  {
+    id: 49,
+    title: "Studio",
+    fontClass: "font-sans text-[2.5rem] font-semibold tracking-tight",
+    color: "text-[#243c34]",
+    bgClass: "bg-[#f8f6f1] bg-[radial-gradient(ellipse_at_top,#e1ece4_0%,#f8f6f1_62%)]",
+    buttonClass:
+      "bg-[#203f35] text-[#fbfcf9] border border-[#203f35] rounded-2xl !font-medium !text-[15px] flex items-center justify-center [&>div:first-child]:text-lg",
+    highlightClass: "bg-[#203f35] text-[#fbfcf9] border border-[#203f35] rounded-2xl",
+    faqClass: "bg-white/70 text-[#243c34] border border-[#d9dfd7] rounded-2xl",
+  },
 ];

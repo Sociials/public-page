@@ -16,6 +16,7 @@ export { default as AdultContentGate } from "./AdultContentGate.jsx";
 export { isAgeVerified, setAgeVerified, getAgeGateStorageKey } from "./ageGate.js";
 export { default as UniversalTheme } from "./UniversalTheme.jsx";
 export { staticThemes } from "./staticThemes.js";
+export { default as ProfilePlaceholder } from "./ProfilePlaceholder.jsx";
 export {
   COLOR_PALETTES,
   GRADIENT_PRESETS,
